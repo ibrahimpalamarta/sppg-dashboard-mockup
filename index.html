@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroStunting × MBG — Dashboard Operasi & Dampak SPPG</title>
+  <meta name="description" content="Dashboard jaringan dapur SPPG Edufarmers untuk program Makan Bergizi Gratis (MBG) — operasi, gizi, dan dampak menuju generasi bebas stunting.">
+  <link rel="icon" href="assets/img/placeholders/portrait.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div id="header-mount"></div>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container container-wide">
+        <div>
+          <span class="eyebrow on-dark">Program Makan Bergizi Gratis · Edufarmers</span>
+          <h1>Makan bergizi hari ini,<br><span class="hl">generasi bebas stunting</span> esok.</h1>
+          <p class="sub">Jaringan dapur SPPG Edufarmers menyajikan makanan bergizi setiap hari untuk ribuan anak — sambil mendanai program ZeroStunting di setiap wilayah operasi.</p>
+          <div class="cta">
+            <a href="#unit" class="btn btn-primary">Lihat unit SPPG</a>
+            <a href="#program" class="btn btn-outline-light">Tentang program</a>
+          </div>
+          <div class="badges" id="hero-badges"></div>
+        </div>
+        <div class="hero-media">
+          <img src="assets/img/hero/anak-mbg.jpg" alt="Anak-anak menerima makan bergizi gratis"
+            onerror="this.onerror=null;this.src='assets/img/placeholders/hero.svg'">
+          <div class="tag">
+            <div><div class="v num">3.992<span style="font-size:1rem">+</span></div><div class="l">Penerima manfaat / hari</div></div>
+            <div style="margin-left:auto;text-align:right"><div class="v num">6</div><div class="l">Dapur SPPG · 2 provinsi</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- IMPACT BAND -->
+    <section class="impact-band section-sm" id="program">
+      <div class="container">
+        <div class="impact-grid" id="impact-grid"></div>
+      </div>
+    </section>
+
+    <!-- NARRATIVE -->
+    <section class="section">
+      <div class="container">
+        <div class="narrative reveal">
+          <div class="nhead">
+            <span class="eyebrow on-dark">Model keberlanjutan</span>
+            <h2>Dari dapur MBG menuju ZeroStunting</h2>
+            <p>Operasi dapur yang efisien menghasilkan surplus yang dialokasikan langsung untuk mendanai program penurunan stunting di wilayah yang sama.</p>
+          </div>
+          <div class="flow" id="flow"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- UNIT GRID -->
+    <section class="section" id="unit">
+      <div class="container">
+        <div class="section-head text-center">
+          <span class="eyebrow">Jaringan Dapur</span>
+          <h2>6 Unit SPPG di 2 provinsi</h2>
+          <p class="intro" style="margin-inline:auto">Empat dapur telah beroperasi penuh sejak Februari 2026, dua lainnya dalam tahap persiapan.</p>
+        </div>
+        <div class="unit-grid" id="unit-grid"></div>
+      </div>
+    </section>
+
+    <!-- PARTNERS -->
+    <section class="section-sm">
+      <div class="container">
+        <p class="text-center eyebrow muted" style="margin-bottom:1.5rem">Didukung oleh</p>
+        <div class="partners" id="partners"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-mount"></div>
+
+  <script src="js/icons.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/role.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/beranda.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Foto dapur (placeholder)">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7C5CB8"/><stop offset="1" stop-color="#5B3E8E"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#g)"/>
+  <g fill="none" stroke="#ffffff" stroke-opacity=".5" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M150 360h500M150 360V270l130 70V270l130 70V270l130 70v90M260 320v40M390 320v40"/>
+  </g>
+  <text x="400" y="470" font-family="'Plus Jakarta Sans',sans-serif" font-size="30" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="2">FOTO DAPUR</text>
+  <text x="400" y="508" font-family="'Plus Jakarta Sans',sans-serif" font-size="20" fill="#fff" fill-opacity=".75" text-anchor="middle">placeholder · ganti di assets/img</text>
+</svg>

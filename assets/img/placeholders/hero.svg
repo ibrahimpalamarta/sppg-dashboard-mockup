@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Hero (placeholder)">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3B2A66"/><stop offset="1" stop-color="#2E2150"/>
+    </linearGradient>
+    <radialGradient id="r" cx="0.7" cy="0.3" r="0.8">
+      <stop offset="0" stop-color="#ED8B2C" stop-opacity=".45"/><stop offset="1" stop-color="#ED8B2C" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g)"/>
+  <rect width="1200" height="800" fill="url(#r)"/>
+  <g fill="none" stroke="#ffffff" stroke-opacity=".28" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="430" cy="360" r="90"/><circle cx="650" cy="360" r="90"/><circle cx="870" cy="360" r="90"/>
+    <path d="M340 560a90 90 0 0 1 180 0M560 560a90 90 0 0 1 180 0M780 560a90 90 0 0 1 180 0"/>
+  </g>
+  <text x="600" y="690" font-family="'Plus Jakarta Sans',sans-serif" font-size="34" font-weight="700" fill="#fff" fill-opacity=".85" text-anchor="middle" letter-spacing="3">FOTO ANAK &amp; MBG</text>
+</svg>

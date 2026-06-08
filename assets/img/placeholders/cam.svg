@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-label="Kamera dapur (placeholder)">
+  <rect width="800" height="480" fill="#1B1430"/>
+  <g stroke="#5B3E8E" stroke-opacity=".4" stroke-width="1.5">
+    <path d="M0 120h800M0 240h800M0 360h800M160 0v480M320 0v480M480 0v480M640 0v480"/>
+  </g>
+  <g fill="none" stroke="#7C5CB8" stroke-opacity=".7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M360 210a40 40 0 0 1 80 0v50a30 30 0 0 0 30 30h20a20 20 0 0 1 20 20v10H290v-10a20 20 0 0 1 20-20h20a30 30 0 0 0 30-30Z" transform="translate(0 -10)"/>
+    <circle cx="400" cy="200" r="46"/>
+  </g>
+  <text x="400" y="350" font-family="'JetBrains Mono',monospace" font-size="22" font-weight="600" fill="#9D8AC8" text-anchor="middle" letter-spacing="3">SINYAL KAMERA</text>
+  <text x="400" y="384" font-family="'JetBrains Mono',monospace" font-size="16" fill="#6B5E8C" text-anchor="middle">menunggu koneksi · placeholder</text>
+</svg>
