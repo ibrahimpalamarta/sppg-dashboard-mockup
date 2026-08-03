@@ -193,9 +193,9 @@
      ============================================================ */
   const kitchenCfg = [
     {
-      slug: 'kedungkandang', code: 'KDK-01', name: 'SPPG Kedungkandang', status: 'BEROPERASI',
-      region: 'Kota Malang', district: 'Kedungkandang', village: 'Buring', province: 'Jawa Timur',
-      address: 'Jl. Ki Ageng Gribig No. 142, Kedungkandang, Kota Malang, Jawa Timur 65137',
+      slug: 'Kebonsari', code: 'KDK-01', name: 'SPPG Kebonsari', status: 'BEROPERASI',
+      region: 'Kota Malang', district: 'Kebonsari', village: 'Buring', province: 'Jawa Timur',
+      address: 'Jl. Ki Ageng Gribig No. 142, Kebonsari, Kota Malang, Jawa Timur 65137',
       lat: -8.0092, lng: 112.6621,
       pic: 'Siti Rahmawati', pm: 2840, capacity: 3000, schools: 12,
       since: '2026-02-16', operatingDays: 108, menuDays: 22, seed: 11, missing: [],
@@ -346,7 +346,7 @@
   });
 
   /* the correction spotlight (§6.3) — original preserved, correction appended */
-  const kdk = kitchenBySlug('kedungkandang');
+  const kdk = kitchenBySlug('Kebonsari');
   const origMenu = kdk.menus.find(m => m.date === '2026-07-15') || kdk.menus[0];
   const correction = {
     originalDate: origMenu.date,
@@ -372,8 +372,8 @@
   });
 
   [
-    { sort: '2026-07-21 07:48', time: '21 Jul 2026 07:48', actor: 'Siti Rahmawati',     role: 'Supervisor Lapangan', action: 'Unggah', entity: 'menu-gizi_KDK-01_2026-07-21.xlsx',   summary: '9 baris · sudah dibersihkan', kitchen: 'SPPG Kedungkandang', source: 'Unggah berkas (XLSX)' },
-    { sort: '2026-07-21 08:05', time: '21 Jul 2026 08:05', actor: 'Rina Kusumaningrum', role: 'Data Admin',          action: 'Tinjau', entity: 'menu-gizi_KDK-01_2026-07-21.xlsx',   summary: '9 dari 9 baris dikonfirmasi', kitchen: 'SPPG Kedungkandang', source: 'Unggah berkas (XLSX)' },
+    { sort: '2026-07-21 07:48', time: '21 Jul 2026 07:48', actor: 'Siti Rahmawati',     role: 'Supervisor Lapangan', action: 'Unggah', entity: 'menu-gizi_KDK-01_2026-07-21.xlsx',   summary: '9 baris · sudah dibersihkan', kitchen: 'SPPG Kebonsari', source: 'Unggah berkas (XLSX)' },
+    { sort: '2026-07-21 08:05', time: '21 Jul 2026 08:05', actor: 'Rina Kusumaningrum', role: 'Data Admin',          action: 'Tinjau', entity: 'menu-gizi_KDK-01_2026-07-21.xlsx',   summary: '9 dari 9 baris dikonfirmasi', kitchen: 'SPPG Kebonsari', source: 'Unggah berkas (XLSX)' },
     { sort: '2026-07-20 16:20', time: '20 Jul 2026 16:20', actor: 'Dwi Hartanto',       role: 'CMS Admin',           action: 'Terbit', entity: 'SOP Penerimaan Bahan Baku v2.1',     summary: 'Visibilitas: Publik', kitchen: '—', source: 'Input manual' },
     { sort: '2026-07-18 11:02', time: '18 Jul 2026 11:02', actor: 'Rina Kusumaningrum', role: 'Data Admin',          action: 'Unggah', entity: 'pengeluaran_SGS-02_2026-07-P1.xlsx', summary: '6 kategori biaya', kitchen: 'SPPG Singosari', source: 'Unggah berkas (XLSX)' },
   ].forEach(e => pushAudit(Object.assign({ hash: fingerprint(e), ref: null }, e)));
@@ -431,7 +431,7 @@
     { id: 'D-02', title: 'SOP Pengolahan & Pengemasan Porsi',         cat: 'SOP',        vis: 'Publik',   version: 'v1.9', updated: '2026-07-02', size: '2,4 MB', type: 'PDF',  by: 'Dwi Hartanto',       desc: 'Alur memasak, kontrol suhu, pengemasan, dan pelabelan porsi harian.' },
     { id: 'D-03', title: 'SOP Distribusi ke Sekolah',                 cat: 'SOP',        vis: 'Publik',   version: 'v1.4', updated: '2026-06-11', size: '1,2 MB', type: 'PDF',  by: 'Dwi Hartanto',       desc: 'Pemuatan, rute, waktu tempuh maksimum, dan serah terima di sekolah.' },
     { id: 'D-04', title: 'Sertifikat Laik Higiene Sanitasi — KDK-01', cat: 'Sertifikat', vis: 'Publik',   version: 'v1.0', updated: '2026-01-12', size: '640 KB', type: 'PDF',  by: 'Siti Rahmawati',     desc: 'Sertifikat Laik Higiene Sanitasi Jasaboga terbitan Dinkes Kota Malang.' },
-    { id: 'D-05', title: 'Sertifikat Halal — KDK-01',                 cat: 'Sertifikat', vis: 'Publik',   version: 'v1.0', updated: '2026-01-28', size: '580 KB', type: 'PDF',  by: 'Siti Rahmawati',     desc: 'Sertifikat halal terbitan BPJPH untuk dapur Kedungkandang.' },
+    { id: 'D-05', title: 'Sertifikat Halal — KDK-01',                 cat: 'Sertifikat', vis: 'Publik',   version: 'v1.0', updated: '2026-01-28', size: '580 KB', type: 'PDF',  by: 'Siti Rahmawati',     desc: 'Sertifikat halal terbitan BPJPH untuk dapur Kebonsari.' },
     { id: 'D-06', title: 'Laporan Bulanan Operasi — Juni 2026',       cat: 'Laporan',    vis: 'Publik',   version: 'v1.0', updated: '2026-07-05', size: '3,1 MB', type: 'PDF',  by: 'Rina Kusumaningrum', desc: 'Ringkasan porsi terdistribusi, kepatuhan input data, dan skor kecukupan gizi.' },
     { id: 'D-07', title: 'Panduan Pengisian Lembar Menu & Gizi',      cat: 'Panduan',    vis: 'Publik',   version: 'v2.0', updated: '2026-06-01', size: '900 KB', type: 'PDF',  by: 'Rina Kusumaningrum', desc: 'Cara mengisi templat menu-gizi agar terbaca mesin tanpa koreksi manual.' },
     { id: 'D-08', title: 'Kebijakan Keterbukaan Data',                cat: 'Kebijakan',  vis: 'Publik',   version: 'v1.1', updated: '2026-05-20', size: '420 KB', type: 'PDF',  by: 'Dwi Hartanto',       desc: 'Komitmen pencatatan waktu, penanggung jawab, sumber data, dan sidik isi.' },
@@ -449,7 +449,7 @@
      12. USERS (§6.9) & ANNOUNCEMENTS (§5.2, C-10)
      ============================================================ */
   const users = [
-    { id: 'U-01', name: 'Siti Rahmawati',     email: 'siti.rahmawati@edufarmers.org', role: 'Supervisor Lapangan', scope: 'SPPG Kedungkandang', status: 'Aktif',    lastLogin: '21 Jul 2026 07:41' },
+    { id: 'U-01', name: 'Siti Rahmawati',     email: 'siti.rahmawati@edufarmers.org', role: 'Supervisor Lapangan', scope: 'SPPG Kebonsari', status: 'Aktif',    lastLogin: '21 Jul 2026 07:41' },
     { id: 'U-02', name: 'Bambang Priyanto',   email: 'bambang.p@edufarmers.org',      role: 'Supervisor Lapangan', scope: 'SPPG Singosari',     status: 'Aktif',    lastLogin: '20 Jul 2026 08:03' },
     { id: 'U-03', name: 'Nurul Aisyah',       email: 'nurul.aisyah@edufarmers.org',   role: 'Supervisor Lapangan', scope: 'SPPG Kepanjen',      status: 'Nonaktif', lastLogin: '02 Jul 2026 10:22' },
     { id: 'U-04', name: 'Rina Kusumaningrum', email: 'rina.k@edufarmers.org',         role: 'Data Admin',          scope: 'Semua dapur',        status: 'Aktif',    lastLogin: '21 Jul 2026 08:00' },

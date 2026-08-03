@@ -10,7 +10,7 @@
 (function () {
   const ROLES = [
     { id: 'publik',     label: 'Publik',              sub: 'Tanpa login',           internal: false, scope: null },
-    { id: 'supervisor', label: 'Supervisor Lapangan', sub: 'Satu dapur ditugaskan', internal: true,  scope: 'SPPG Kedungkandang', kitchen: 'kedungkandang' },
+    { id: 'supervisor', label: 'Supervisor Lapangan', sub: 'Satu dapur ditugaskan', internal: true,  scope: 'SPPG Kebonsari', kitchen: 'Kebonsari' },
     { id: 'data',       label: 'Data Admin',          sub: 'Seluruh dapur',         internal: true,  scope: 'Semua dapur' },
     { id: 'cms',        label: 'CMS Admin',           sub: 'Konten & dokumen',      internal: true,  scope: 'Semua dapur' },
     { id: 'internal',   label: 'Internal User',       sub: 'Hanya baca',            internal: true,  scope: 'Semua dapur' },

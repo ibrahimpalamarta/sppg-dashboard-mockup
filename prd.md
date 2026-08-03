@@ -30,7 +30,7 @@ Non-goals are anything that would force kitchens onto a new operational system: 
 
 The internal workspace defines four roles with a clear escalation of authority, plus a data-scope constraint. The mockup demonstrates these through a role switcher, and each access-denied page enumerates the acting role's permissions.
 
-**Supervisor Lapangan (Field Supervisor)** can upload source files, review the reading results, confirm and lock records, and submit corrections. This role is **scoped to a single assigned kitchen** — the mockup shows a field supervisor limited to SPPG Kedungkandang only. Accessible pages: Input Data and Jejak Audit.
+**Supervisor Lapangan (Field Supervisor)** can upload source files, review the reading results, confirm and lock records, and submit corrections. This role is **scoped to a single assigned kitchen** — the mockup shows a field supervisor limited to SPPG Kebonsari only. Accessible pages: Input Data and Jejak Audit.
 
 **Administrator Data (Data Administrator)** holds all supervisor permissions plus managing the AKG reference data, managing documents & SOPs, publishing the public menu, and approving corrections, across all kitchens. Accessible pages add Ringkasan, Pengeluaran, Arsitektur, Data Acuan, and Dokumen.
 
@@ -110,7 +110,7 @@ The internal workspace uses a distinct dark-sidebar layout. The sidebar organize
 
 ### 6.1 Ringkasan (Program summary)
 
-A program-wide dashboard (as-of date, kitchen count) with headline KPIs (daily recipients and installed capacity, kitchens operating e.g. 2/3, schools served, cumulative portions over N operating days). It shows a **data-entry compliance** panel per kitchen (locked working days out of the last N working days, weekends excluded; e.g., Kedungkandang 100%, Singosari 80% with specific missing dates), with an explicit note that a not-yet-operating kitchen is excluded from compliance and scoring and this does not imply poor performance. It includes a **cross-kitchen adequacy chart** (multi-series line over ~10 days against a stated reference segment, per-nutrient contributions capped at 100%), a **kitchen comparison table** (status, daily recipients, capacity, utilization, schools, average nutrition score from all locked records), and a **recent-activity feed** (last 5 lock/correction events) linking to the full audit trail.
+A program-wide dashboard (as-of date, kitchen count) with headline KPIs (daily recipients and installed capacity, kitchens operating e.g. 2/3, schools served, cumulative portions over N operating days). It shows a **data-entry compliance** panel per kitchen (locked working days out of the last N working days, weekends excluded; e.g., Kebonsari 100%, Singosari 80% with specific missing dates), with an explicit note that a not-yet-operating kitchen is excluded from compliance and scoring and this does not imply poor performance. It includes a **cross-kitchen adequacy chart** (multi-series line over ~10 days against a stated reference segment, per-nutrient contributions capped at 100%), a **kitchen comparison table** (status, daily recipients, capacity, utilization, schools, average nutrition score from all locked records), and a **recent-activity feed** (last 5 lock/correction events) linking to the full audit trail.
 
 ### 6.2 Input Data — daily submission wizard
 

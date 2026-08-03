@@ -31,16 +31,16 @@ Rasio **4:3**, ~1000×750. Pola berkas: `assets/img/gallery/<slug>-<n>.jpg`
 Hanya dapur **beroperasi** yang punya galeri. Dapur `kepanjen` (persiapan) sengaja menampilkan
 *empty state*, bukan foto.
 
-### SPPG Kedungkandang (`kedungkandang`)
+### SPPG Kebonsari (`Kebonsari`)
 
 | Berkas | Isi gambar | Prompt |
 |---|---|---|
-| `assets/img/gallery/kedungkandang-1.jpg` | Bangunan dapur | "Exterior of a clean modern Indonesian institutional kitchen building in an urban district, morning light, documentary style, 4:3" |
-| `assets/img/gallery/kedungkandang-2.jpg` | Area penerimaan bahan | "Food ingredient receiving area of an Indonesian institutional kitchen, crates of fresh vegetables being weighed on a scale, 4:3" |
-| `assets/img/gallery/kedungkandang-3.jpg` | Area memasak | "Large Indonesian institutional kitchen cooking area with big steel pots and stoves, staff in aprons and hairnets, 4:3" |
-| `assets/img/gallery/kedungkandang-4.jpg` | Pengemasan porsi | "Meal portioning line in an Indonesian institutional kitchen, compartment trays being filled with rice and vegetables, 4:3" |
-| `assets/img/gallery/kedungkandang-5.jpg` | Muat ompreng ke kendaraan | "Stacked stainless meal containers being loaded into a delivery van outside an Indonesian kitchen, 4:3" |
-| `assets/img/gallery/kedungkandang-6.jpg` | Distribusi ke sekolah | "Meal trays being handed out to Indonesian elementary school students in a classroom, warm daylight, 4:3" |
+| `assets/img/gallery/Kebonsari-1.jpg` | Bangunan dapur | "Exterior of a clean modern Indonesian institutional kitchen building in an urban district, morning light, documentary style, 4:3" |
+| `assets/img/gallery/Kebonsari-2.jpg` | Area penerimaan bahan | "Food ingredient receiving area of an Indonesian institutional kitchen, crates of fresh vegetables being weighed on a scale, 4:3" |
+| `assets/img/gallery/Kebonsari-3.jpg` | Area memasak | "Large Indonesian institutional kitchen cooking area with big steel pots and stoves, staff in aprons and hairnets, 4:3" |
+| `assets/img/gallery/Kebonsari-4.jpg` | Pengemasan porsi | "Meal portioning line in an Indonesian institutional kitchen, compartment trays being filled with rice and vegetables, 4:3" |
+| `assets/img/gallery/Kebonsari-5.jpg` | Muat ompreng ke kendaraan | "Stacked stainless meal containers being loaded into a delivery van outside an Indonesian kitchen, 4:3" |
+| `assets/img/gallery/Kebonsari-6.jpg` | Distribusi ke sekolah | "Meal trays being handed out to Indonesian elementary school students in a classroom, warm daylight, 4:3" |
 
 ### SPPG Singosari (`singosari`)
 

@@ -43,7 +43,7 @@
 
   /* pin positions on the Malang Raya canvas (stylized, not projected) */
   const POS = {
-    kedungkandang: { x: 58, y: 38 },
+    Kebonsari: { x: 58, y: 38 },
     singosari:     { x: 50, y: 20 },
     kepanjen:      { x: 40, y: 66 },
   };

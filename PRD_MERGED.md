@@ -40,7 +40,7 @@ Caveat on recency: Source A is *evidentially* more recent (its mockup was captur
 
 ### 0.4 Verification note
 
-I opened the mockup screenshots and cross-checked them against Source A's prose. The **Menu & Gizi** screen matches Source A in detail — kitchen chips (Kedungkandang / Singosari, with Kepanjen noted as not yet publishing), the 22-day locked-menu dropdown, the six recipient segments with per-segment scores, the 93% headline for *SD kelas awal*, the nine-nutrient breakdown including the **Berlebih** state, and the 14-day history chart with a 90% dashed threshold. Source A is a reliable description of the mockup. I did **not** exhaustively review all 13 screenshots; per-screen visual review is deferred to build time.
+I opened the mockup screenshots and cross-checked them against Source A's prose. The **Menu & Gizi** screen matches Source A in detail — kitchen chips (Kebonsari / Singosari, with Kepanjen noted as not yet publishing), the 22-day locked-menu dropdown, the six recipient segments with per-segment scores, the 93% headline for *SD kelas awal*, the nine-nutrient breakdown including the **Berlebih** state, and the 14-day history chart with a 90% dashed threshold. Source A is a reliable description of the mockup. I did **not** exhaustively review all 13 screenshots; per-screen visual review is deferred to build time.
 
 ---
 
@@ -104,7 +104,7 @@ Union of both documents' Phase-1 lists:
 
 ### 2.3 Pilot footprint
 
-⚠️ **C-01 — see §11.** Source A specifies **3 kitchens in Malang Raya, East Java** (2 operating, 1 in preparation): **SPPG Kedungkandang (KDK-01)**, **SPPG Singosari (SGS-02)**, **SPPG Kepanjen (KPJ-03, persiapan)**. Source B states no footprint. The current codebase implements a **different, non-matching set of 6 kitchens across 2 provinces**. Resolution required before any data work.
+⚠️ **C-01 — see §11.** Source A specifies **3 kitchens in Malang Raya, East Java** (2 operating, 1 in preparation): **SPPG Kebonsari (KDK-01)**, **SPPG Singosari (SGS-02)**, **SPPG Kepanjen (KPJ-03, persiapan)**. Source B states no footprint. The current codebase implements a **different, non-matching set of 6 kitchens across 2 provinces**. Resolution required before any data work.
 
 ---
 
@@ -290,7 +290,7 @@ Sidebar groups navigation under **FASE 1** with a **FASE 2** note for future add
 
 Program-wide dashboard (as-of date, kitchen count) with:
 - **Headline KPIs** — daily recipients and installed capacity, kitchens operating (e.g. 2/3), schools served, cumulative portions over N operating days.
-- **Data-entry compliance** per kitchen — locked working days out of the last N working days, **weekends excluded** (e.g. Kedungkandang 100%, Singosari 80% with the specific missing dates named), plus an explicit note that a not-yet-operating kitchen is **excluded from compliance and scoring** and that this does not imply poor performance.
+- **Data-entry compliance** per kitchen — locked working days out of the last N working days, **weekends excluded** (e.g. Kebonsari 100%, Singosari 80% with the specific missing dates named), plus an explicit note that a not-yet-operating kitchen is **excluded from compliance and scoring** and that this does not imply poor performance.
 - **Cross-kitchen adequacy chart** — multi-series line over ~10 days against a stated reference segment, per-nutrient contributions capped at 100%.
 - **Kitchen comparison table** — status, daily recipients, capacity, utilization, schools, average nutrition score across all locked records.
 - **Recent-activity feed** — last 5 lock/correction events, linking to the full audit trail.
@@ -505,7 +505,7 @@ Every place the two documents disagree. **Nothing here has been silently merged.
 ### ⚠️ C-01 — Kitchen network footprint
 | | |
 |---|---|
-| **Source A** | 3 kitchens, Malang Raya, East Java: Kedungkandang (KDK-01), Singosari (SGS-02), Kepanjen (KPJ-03, persiapan). 2 operating, 1 preparing. Corroborated by all mockups. |
+| **Source A** | 3 kitchens, Malang Raya, East Java: Kebonsari (KDK-01), Singosari (SGS-02), Kepanjen (KPJ-03, persiapan). 2 operating, 1 preparing. Corroborated by all mockups. |
 | **Source B** | Silent — describes "a growing network of SPPG kitchens across Indonesia" with no pilot footprint. |
 | **Current codebase** | **Neither.** 6 kitchens across 2 provinces: Sukun, Donomulyo, Poncokusumo, Simalungun (aktif), Lawang, Karangnongko (persiapan). |
 | **Assessment** | Not a document-vs-document conflict — a **document-vs-code** conflict. A is specific and evidence-backed; B does not contradict it. |

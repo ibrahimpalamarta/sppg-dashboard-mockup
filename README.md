@@ -19,7 +19,7 @@ Seluruh data adalah **simulasi**. Spesifikasi yang dibangun ada di **[PRD_MERGED
 | `transparansi.html` | Pustaka dokumen + prinsip keterbukaan |
 | `tentang.html` | Batas tanggung jawab platform vs dapur |
 
-Slug dapur: `kedungkandang` (KDK-01), `singosari` (SGS-02) — beroperasi; `kepanjen` (KPJ-03) — persiapan.
+Slug dapur: `Kebonsari` (KDK-01), `singosari` (SGS-02) — beroperasi; `kepanjen` (KPJ-03) — persiapan.
 
 ### Ruang kerja internal (sidebar gelap, berpagar peran)
 
