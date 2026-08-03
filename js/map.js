@@ -1,84 +1,109 @@
 /* ============================================================
-   MBG Dashboard — Stylized Indonesia map with status pins
+   MBG Dashboard — Nested stylized map: Indonesia → Jawa Timur → Malang Raya
+   PRD_MERGED §5.2 / §5.3 · C-13: stylized, NOT geographically projected.
+   Selection is bidirectional — MapView.select(slug) highlights a pin,
+   and clicking a pin fires the onSelect callback.
    ============================================================ */
 (function () {
   const Map = {};
+  let host = null, onSelect = null, current = null;
 
-  // simplified stylized archipelago (not geographically exact) on a 0..100 x 0..80 canvas
-  const ISLANDS = `
-    <g class="map-islands" fill="var(--brand-lilac)" stroke="#D9CCEF" stroke-width="0.4">
-      <!-- Sumatra -->
-      <path d="M10 14 Q14 16 16 22 L22 34 Q26 42 30 48 Q31 52 28 53 Q24 50 21 44 L14 30 Q10 22 8 17 Q8 14 10 14 Z"/>
-      <!-- Kalimantan -->
-      <path d="M40 30 Q52 27 58 32 Q62 38 58 46 Q52 54 44 52 Q36 50 35 42 Q34 33 40 30 Z"/>
-      <!-- Sulawesi -->
-      <path d="M64 30 Q68 30 67 36 Q70 40 68 44 Q66 48 64 46 Q65 41 62 40 Q66 38 63 34 Q62 31 64 30 Z"/>
-      <!-- Papua -->
-      <path d="M80 36 Q92 34 95 40 Q96 46 90 48 Q83 50 80 45 Q78 39 80 36 Z"/>
-      <!-- Java -->
-      <path d="M48 66 Q58 64 70 67 Q77 68 78 71 Q76 74 70 73 Q58 71 50 72 Q46 71 48 66 Z"/>
-      <!-- Bali / Nusa Tenggara -->
-      <circle cx="81" cy="71" r="1.6"/><circle cx="85" cy="72" r="1.4"/><circle cx="89" cy="72.5" r="1.2"/>
-      <!-- Maluku -->
-      <circle cx="74" cy="44" r="1.4"/><circle cx="76" cy="50" r="1.2"/>
+  /* ---- level 1: Indonesia, with Jawa Timur called out ---- */
+  const INDONESIA = `
+    <g class="mm-land">
+      <path d="M4,30 L18,26 L26,33 L20,39 L9,38 Z"/>
+      <path d="M28,38 L44,34 L52,38 L48,45 L34,45 Z"/>
+      <path d="M55,25 L68,22 L74,30 L66,36 L57,33 Z"/>
+      <path d="M78,28 L92,26 L96,34 L86,38 L78,35 Z"/>
+      <path d="M62,46 L72,44 L76,50 L68,53 Z"/>
+    </g>
+    <g class="mm-jatim">
+      <path d="M44,41 L54,39 L58,44 L50,48 L44,46 Z"/>
     </g>`;
 
-  Map.render = function (mount) {
-    const units = MBG.units;
-    const pins = units.map(u => {
-      const colorClass = u.status === 'AKTIF' ? 'pin-aktif' : 'pin-prep';
-      return `<button class="map-pin ${colorClass}" style="left:${u.map.x}%;top:${u.map.y / 80 * 100}%"
-        data-slug="${u.slug}" aria-label="${u.name}">
-        <span class="mp-dot"></span><span class="mp-ring"></span>
-      </button>`;
-    }).join('');
+  /* ---- level 2: Jawa Timur, with Malang Raya called out ---- */
+  const JATIM = `
+    <g class="mm-land">
+      <path d="M10,30 L30,22 L52,24 L72,30 L86,42 L74,58 L52,62 L30,56 L14,44 Z"/>
+    </g>
+    <g class="mm-malang">
+      <path d="M44,40 L60,38 L66,48 L56,58 L44,54 Z"/>
+    </g>`;
 
-    mount.innerHTML = `
-      <div class="map-canvas">
-        <svg viewBox="0 0 100 80" preserveAspectRatio="xMidYMid meet" class="map-svg" aria-hidden="true">
-          ${ISLANDS}
-          <!-- region highlight rings -->
-          <circle cx="16" cy="30" r="9" class="map-region"/>
-          <circle cx="63" cy="71" r="9" class="map-region"/>
-          <text x="16" y="46" text-anchor="middle" class="map-region-l">Sumatera Utara</text>
-          <text x="63" y="60" text-anchor="middle" class="map-region-l">Jawa Timur</text>
-        </svg>
-        <div class="map-pins">${pins}</div>
-        <div class="map-pop" id="map-pop" hidden></div>
-      </div>`;
+  /* ---- level 3: Malang Raya — the working canvas for pins ---- */
+  const MALANG = `
+    <g class="mm-land">
+      <path d="M18,14 L54,8 L78,20 L86,46 L72,76 L44,88 L20,74 L10,44 Z"/>
+    </g>
+    <g class="mm-sub">
+      <path d="M40,26 L62,22 L66,40 L46,46 Z"/>
+      <text x="53" y="35" class="mm-lbl">Kota Malang</text>
+      <text x="34" y="66" class="mm-lbl">Kabupaten Malang</text>
+    </g>`;
 
-    const pop = mount.querySelector('#map-pop');
-    mount.querySelectorAll('.map-pin').forEach(pin => {
-      pin.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const u = MBG.unitBySlug(pin.dataset.slug);
-        showPop(pop, pin, u);
-      });
-      pin.addEventListener('mouseenter', () => {
-        const u = MBG.unitBySlug(pin.dataset.slug);
-        showPop(pop, pin, u);
-      });
-    });
-    mount.querySelector('.map-canvas').addEventListener('mouseleave', () => { pop.hidden = true; });
+  /* pin positions on the Malang Raya canvas (stylized, not projected) */
+  const POS = {
+    kedungkandang: { x: 58, y: 38 },
+    singosari:     { x: 50, y: 20 },
+    kepanjen:      { x: 40, y: 66 },
   };
 
-  function showPop(pop, pin, u) {
-    const active = u.status === 'AKTIF';
-    pop.innerHTML = `
-      <div class="mpop-head">
-        <strong>${u.name}</strong>
-        <span class="badge ${active ? 'badge-aktif' : 'badge-persiapan'}">${u.status}</span>
-      </div>
-      <div class="mpop-loc">${icon('pin')} ${u.area}, ${u.province}</div>
-      <div class="mpop-stats">
-        <div><div class="v num">${active ? UI.fmt(u.stats.porsiHariIni) : '—'}</div><div class="l">Porsi hari ini</div></div>
-        <div><div class="v num">${active ? UI.fmt(u.stats.pmHarian) : '—'}</div><div class="l">PM / hari</div></div>
-      </div>
-      <a class="btn btn-purple btn-sm btn-block" href="unit.html?u=${u.slug}">Buka dashboard ${icon('arrowRight')}</a>`;
-    pop.style.left = pin.style.left;
-    pop.style.top = pin.style.top;
-    pop.hidden = false;
+  function pinColor(k) {
+    return k.status === 'BEROPERASI' ? 'var(--success)' : 'var(--warning)';
   }
 
+  function render(el, opts) {
+    host = el;
+    opts = opts || {};
+    onSelect = opts.onSelect || null;
+
+    const pins = MBG.kitchens.map(k => {
+      const p = POS[k.slug] || { x: 50, y: 50 };
+      return `<g class="mm-pin" data-slug="${k.slug}" transform="translate(${p.x},${p.y})" tabindex="0"
+                 role="button" aria-label="${k.name}">
+        <circle class="mm-halo" r="7" fill="${pinColor(k)}"/>
+        <circle class="mm-dot" r="3.2" fill="${pinColor(k)}"/>
+        <text class="mm-name" y="-10" text-anchor="middle">${k.name.replace('SPPG ', '')}</text>
+      </g>`;
+    }).join('');
+
+    host.innerHTML = `
+      <div class="mm">
+        <div class="mm-crumb">
+          <span class="mm-c">Indonesia</span>${icon('chevronRight')}
+          <span class="mm-c">Jawa Timur</span>${icon('chevronRight')}
+          <span class="mm-c on">Malang Raya</span>
+        </div>
+        <div class="mm-mini">
+          <svg viewBox="0 0 100 60" aria-label="Indonesia">${INDONESIA}</svg>
+          <svg viewBox="0 0 100 80" aria-label="Jawa Timur">${JATIM}</svg>
+        </div>
+        <svg class="mm-main" viewBox="0 0 100 100" role="img" aria-label="Peta dapur SPPG di Malang Raya">
+          ${MALANG}${pins}
+        </svg>
+        <div class="mm-legend">
+          <span class="mml"><i style="background:var(--success)"></i> Beroperasi</span>
+          <span class="mml"><i style="background:var(--warning)"></i> Persiapan</span>
+          <span class="mml muted">Peta bergaya — bukan proyeksi geografis</span>
+        </div>
+      </div>`;
+
+    host.querySelectorAll('.mm-pin').forEach(g => {
+      const fire = () => { select(g.dataset.slug); if (onSelect) onSelect(g.dataset.slug); };
+      g.addEventListener('click', fire);
+      g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fire(); } });
+    });
+  }
+
+  /* highlight a pin — called from the kitchen list ("Sorot di peta") */
+  function select(slug) {
+    if (!host) return;
+    current = slug;
+    host.querySelectorAll('.mm-pin').forEach(g => g.classList.toggle('on', g.dataset.slug === slug));
+  }
+
+  Map.render = render;
+  Map.select = select;
+  Map.current = () => current;
   window.MapView = Map;
 })();

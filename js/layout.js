@@ -1,42 +1,33 @@
 /* ============================================================
-   MBG Dashboard — Shared header & footer (injected)
-   Usage: Layout.render({ page: 'beranda'|'unit'|'overview'|'unggah', unit: slug })
+   MBG Dashboard — Public site header & footer (injected)
+   PRD_MERGED §5.1
+   Usage: Layout.render({ page: 'beranda'|'dapur'|'menu'|'transparansi'|'tentang' })
    ============================================================ */
 (function () {
-  function header(page, unitSlug) {
-    const units = MBG.units;
-    const u = unitSlug || 'sukun';
-    const link = (href, label, key, internal) => {
-      const cls = [page === key ? 'active' : '', internal ? 'internal' : ''].filter(Boolean).join(' ');
-      return `<a href="${href}" class="${cls}">${label}</a>`;
-    };
+  const NAV = [
+    { key: 'beranda',      href: 'index.html',        label: 'Beranda' },
+    { key: 'dapur',        href: 'dapur.html',        label: 'Dapur' },
+    { key: 'menu',         href: 'menu.html',         label: 'Menu & Gizi' },
+    { key: 'transparansi', href: 'transparansi.html', label: 'Transparansi' },
+    { key: 'tentang',      href: 'tentang.html',      label: 'Tentang' },
+  ];
+
+  function header(page) {
     return `
+    <div class="mock-banner">MOCKUP — seluruh data pada halaman ini simulasi, bukan data program sungguhan</div>
     <header class="site-header">
-      <div class="container-wide container">
+      <div class="container container-wide">
         <div class="bar">
-          <a class="brand" href="index.html" aria-label="ZeroStunting — MBG">
-            <span class="logo">Z</span>
-            <span class="bt"><b>ZeroStunting</b><span>Edufarmers · MBG</span></span>
+          <a class="brand" href="index.html" aria-label="MBG Dashboard">
+            <span class="logo">${icon('utensils')}</span>
+            <span class="bt"><b>MBG Dashboard</b><span>ZeroStunting · EduFarmers</span></span>
           </a>
           <nav class="nav" aria-label="Navigasi utama">
-            ${link('index.html', 'Beranda', 'beranda')}
-            ${link('unit.html?u=' + u, 'Unit SPPG', 'unit')}
-            ${link('overview.html', 'Monitor', 'overview', true)}
-            ${link('unggah.html', 'Unggah Data', 'unggah', true)}
+            ${NAV.map(n => `<a href="${n.href}" class="${page === n.key ? 'active' : ''}">${n.label}</a>`).join('')}
           </nav>
           <div class="header-right">
-            <label class="upick" title="Pilih unit SPPG">
-              ${icon('pin')}
-              <select id="unit-jump">
-                ${units.map(x => `<option value="${x.slug}" ${x.slug === u ? 'selected' : ''}>${x.name}</option>`).join('')}
-              </select>
-            </label>
-            <div class="lang" title="Bahasa">
-              <button class="on" data-lang="id">ID</button>
-              <button data-lang="en" title="English (segera)">EN</button>
-            </div>
-            ${Role.markup()}
-            <button class="menu-btn" aria-label="Menu">${icon('menu')}</button>
+            <a class="btn btn-primary btn-sm" href="ringkasan.html">${icon('lock')} Masuk ruang internal</a>
+            <button class="menu-btn" aria-label="Menu" aria-expanded="false">${icon('menu')}</button>
           </div>
         </div>
       </div>
@@ -46,42 +37,26 @@
   function footer() {
     return `
     <footer class="site-footer">
-      <div class="container">
+      <div class="container container-wide">
         <div class="cols">
           <div class="f-brand">
-            <b>ZeroStunting × MBG</b>
-            <p>Jaringan dapur SPPG Edufarmers untuk program Makan Bergizi Gratis — gizi hari ini untuk generasi bebas stunting esok.</p>
-            <div class="flex gap-2" style="margin-top:1rem">
-              <span class="pill">${icon('shield')} SLHS</span>
-              <span class="pill">${icon('check')} Halal</span>
-              <span class="pill">${icon('badge')} HACCP</span>
-            </div>
+            <b>MBG Dashboard</b>
+            <p>Lapisan transparansi dan analitik untuk jaringan dapur SPPG di bawah program Makan Bergizi Gratis. Menyajikan data yang dihasilkan proses yang sudah berjalan — bukan menggantikannya.</p>
           </div>
           <div>
-            <h5>Program</h5>
-            <a href="index.html">Beranda</a>
-            <a href="unit.html?u=sukun">Unit SPPG</a>
-            <a href="overview.html">Monitor Internal</a>
-            <a href="unggah.html">Unggah Data</a>
+            <h5>Halaman</h5>
+            ${NAV.map(n => `<a href="${n.href}">${n.label}</a>`).join('')}
           </div>
           <div>
-            <h5>Organisasi</h5>
-            <a href="#">Tentang Edufarmers</a>
-            <a href="#">Program ZeroStunting</a>
-            <a href="#">Mitra & Donor</a>
-            <a href="#">Laporan Dampak</a>
-          </div>
-          <div>
-            <h5>Kontak</h5>
-            <a href="#">info@edufarmers.org</a>
-            <a href="#">Kota Malang, Jawa Timur</a>
-            <a href="#">Simalungun, Sumatera Utara</a>
-            <a href="#">mbg.zerostunting.com</a>
+            <h5>Keterbukaan</h5>
+            <a href="transparansi.html">Pustaka dokumen</a>
+            <a href="menu.html">Rincian sembilan zat gizi</a>
+            <a href="tentang.html">Apa yang dilakukan platform</a>
           </div>
         </div>
         <div class="f-bottom">
-          <span>© 2026 Edufarmers International Foundation · Prototipe dashboard MBG</span>
-          <span>Sebagian angka bersifat ilustratif untuk keperluan purwarupa.</span>
+          <span>EduFarmers International Foundation · ZeroStunting</span>
+          <span>Mockup untuk keperluan proposal — data simulasi.</span>
         </div>
       </div>
     </footer>`;
@@ -89,35 +64,18 @@
 
   function render(opts) {
     opts = opts || {};
-    const hMount = document.getElementById('header-mount');
-    const fMount = document.getElementById('footer-mount');
-    if (hMount) hMount.innerHTML = header(opts.page, opts.unit);
-    if (fMount) fMount.innerHTML = footer();
+    const h = document.getElementById('header-mount');
+    const f = document.getElementById('footer-mount');
+    if (h) h.innerHTML = header(opts.page);
+    if (f) f.innerHTML = footer();
 
-    // wire unit jump
-    const sel = document.getElementById('unit-jump');
-    if (sel) sel.addEventListener('change', () => { location.href = 'unit.html?u=' + sel.value; });
-
-    // wire lang stub
-    document.querySelectorAll('.lang button').forEach(b => b.addEventListener('click', () => {
-      if (b.dataset.lang === 'en') { alert('Versi Bahasa Inggris segera hadir.'); return; }
-      document.querySelectorAll('.lang button').forEach(x => x.classList.remove('on'));
-      b.classList.add('on');
-    }));
-
-    // mobile menu (simple)
     const mb = document.querySelector('.menu-btn');
     if (mb) mb.addEventListener('click', () => {
       const nav = document.querySelector('.nav');
-      nav.style.display = nav.style.display === 'flex' ? '' : 'flex';
-      nav.style.position = 'absolute'; nav.style.flexDirection = 'column';
-      nav.style.top = 'var(--header-h)'; nav.style.left = '0'; nav.style.right = '0';
-      nav.style.background = 'var(--brand-plum)'; nav.style.padding = '0.5rem 1rem 1rem';
+      const open = nav.classList.toggle('open');
+      mb.setAttribute('aria-expanded', open);
     });
-
-    Role.bind();
-    Role.apply();
   }
 
-  window.Layout = { render };
+  window.Layout = { render, NAV };
 })();

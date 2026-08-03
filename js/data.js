@@ -1,433 +1,566 @@
 /* ============================================================
-   MBG Dashboard — Mock data (all illustrative for prototype)
-   Real anchor facts kept for credibility; fabricated figures
-   marked illustrative in the UI. Indonesian copy, English keys.
+   MBG Dashboard — Mock data layer (single source of truth)
+   Scoped against PRD_MERGED.md
+   - 3 SPPG kitchens, Malang Raya (PRD_MERGED §2.3, C-01)
+   - 9 nutrients × 6 recipient segments vs versioned AKG (§4.3)
+   - Locked records w/ fingerprint + append-only corrections (§4.1, §4.2)
+   All values are SIMULATED. Structured to follow Permenkes 28/2019
+   and Tabel Komposisi Pangan Indonesia — not copies of those tables.
    ============================================================ */
 (function () {
-  // ---------- helpers ----------
-  const food = (n) => `assets/img/menu/${n}.jpg`;
-  const gal = (n) => `assets/img/gallery/${n}.jpg`;
-  const por = (n) => `assets/img/people/${n}.jpg`;
-  const rec = (n) => `assets/img/recipe/${n}.jpg`;
 
-  // ---------- national / aggregate ----------
-  const national = {
-    totalKitchens: 6,
-    active: 4,
-    prep: 2,
-    pmPerDay: 3992,        // ~3.992+ PM/hari (3 reporting kitchens) — real anchor
-    schoolsServed: 38,
-    porsiKumulatif: 412680,
-    provinces: 2,
-    incentivePerDay: 36,   // Rp juta/day at full operation (real anchor: Rp 36 jt/day)
-    operationalRate: 13000,// Rp/pax/hari (real anchor)
-    incentiveKitchen: 6,   // Rp juta/hari/kitchen (real anchor)
-    zerostuntingAllocation: 248, // Rp juta dialokasikan ke ZeroStunting (illustrative)
-    updatedAt: '7 Jun 2026, 08:42 WIB',
+  /* ============================================================
+     1. NUTRIENTS (§4.3) — the nine scored nutrients
+     ============================================================ */
+  const nutrients = [
+    { key: 'energi',   label: 'Energi',      unit: 'kkal', dec: 0 },
+    { key: 'protein',  label: 'Protein',     unit: 'g',    dec: 1 },
+    { key: 'lemak',    label: 'Lemak',       unit: 'g',    dec: 1 },
+    { key: 'karbo',    label: 'Karbohidrat', unit: 'g',    dec: 1 },
+    { key: 'serat',    label: 'Serat',       unit: 'g',    dec: 1 },
+    { key: 'kalsium',  label: 'Kalsium',     unit: 'mg',   dec: 0 },
+    { key: 'besi',     label: 'Zat besi',    unit: 'mg',   dec: 1 },
+    { key: 'vitA',     label: 'Vitamin A',   unit: 'mcg',  dec: 0 },
+    { key: 'zinc',     label: 'Zinc',        unit: 'mg',   dec: 1 },
+  ];
+  const NKEYS = nutrients.map(n => n.key);
+
+  /* ============================================================
+     2. AKG REFERENCE TABLE (§4.5, §6.6)
+     Versioned data. Thresholds are computed from `targetPct`,
+     never hard-coded — adequacy policy is changed here.
+     ============================================================ */
+  const akg = {
+    version: 'v1.2',
+    effectiveDate: '1 Juni 2026',
+    source: 'Permenkes No. 28 Tahun 2019 (struktur)',
+    status: 'Aktif',
+    updatedAt: '28 Mei 2026, 14:20 WIB',
+    updatedBy: 'Rina Kusumaningrum',
+    simulated: true,
+    /* daily requirement per segment + share of daily AKG one meal targets */
+    segments: [
+      { id: 'balita',    label: 'Balita',          sub: '1–3 tahun',   targetPct: 30,
+        daily: { energi: 1350, protein: 20, lemak: 45, karbo: 215, serat: 19, kalsium: 650,  besi: 7,  vitA: 400,  zinc: 3 } },
+      { id: 'sd-awal',   label: 'SD kelas awal',   sub: '4–6 tahun',   targetPct: 30,
+        daily: { energi: 1400, protein: 25, lemak: 50, karbo: 220, serat: 20, kalsium: 1000, besi: 10, vitA: 450,  zinc: 5 } },
+      { id: 'sd-akhir',  label: 'SD kelas akhir',  sub: '7–9 tahun',   targetPct: 30,
+        daily: { energi: 1650, protein: 40, lemak: 55, karbo: 250, serat: 23, kalsium: 1000, besi: 10, vitA: 500,  zinc: 5 } },
+      { id: 'smp',       label: 'SMP',             sub: '10–12 tahun', targetPct: 30,
+        daily: { energi: 2000, protein: 50, lemak: 65, karbo: 300, serat: 28, kalsium: 1200, besi: 8,  vitA: 600,  zinc: 8 } },
+      { id: 'ibu-hamil', label: 'Ibu hamil',       sub: 'trimester 2', targetPct: 30,
+        daily: { energi: 2600, protein: 70, lemak: 75, karbo: 385, serat: 36, kalsium: 1200, besi: 18, vitA: 900,  zinc: 14 } },
+      { id: 'ibu-menyusui', label: 'Ibu menyusui', sub: '0–6 bulan',   targetPct: 30,
+        daily: { energi: 2600, protein: 80, lemak: 77, karbo: 385, serat: 37, kalsium: 1200, besi: 9,  vitA: 1050, zinc: 15 } },
+    ],
+    /* band thresholds — read by Nutrition.band() */
+    bands: { cukup: 90, perhatian: 70 },
+    history: [
+      { version: 'v1.2', date: '1 Jun 2026',  by: 'Rina Kusumaningrum', note: 'Penyesuaian target serat & kalsium segmen SD.' },
+      { version: 'v1.1', date: '3 Mar 2026',  by: 'Rina Kusumaningrum', note: 'Penambahan segmen ibu menyusui (0–6 bulan).' },
+      { version: 'v1.0', date: '12 Jan 2026', by: 'Dwi Hartanto',       note: 'Tabel acuan awal, mengikuti struktur Permenkes 28/2019.' },
+    ],
   };
 
-  // ---------- partners (org-level) ----------
-  const partners = [
-    { name: 'Edufarmers', type: 'Penyelenggara', desc: 'Yayasan penyelenggara jaringan dapur SPPG dan program ZeroStunting.' },
-    { name: 'Badan Gizi Nasional', short: 'BGN', type: 'Pemerintah', desc: 'Lembaga negara penyelenggara program Makan Bergizi Gratis (MBG).' },
-    { name: 'World Food Programme', short: 'WFP', type: 'Lembaga Internasional', desc: 'Dukungan teknis gizi, standar mutu pangan, dan pemantauan dampak.' },
-    { name: 'Muhammadiyah', type: 'Organisasi Masyarakat', desc: 'Mitra jejaring sekolah, relawan, dan distribusi di tingkat wilayah.' },
-    { name: 'Japfa', type: 'Mitra Industri', desc: 'Pemasok protein hewani dan dukungan rantai pasok komoditas.' },
-    { name: 'Google.org', type: 'Donor Teknologi', desc: 'Dukungan filantropi teknologi untuk digitalisasi operasi dapur.' },
+  /* ============================================================
+     3. FOOD COMPOSITION (TKPI-structured, per 100 g) — simulated
+     Menu nutrition is COMPUTED from these, never hand-entered.
+     ============================================================ */
+  const tkpi = {
+    'Nasi putih':            { kat: 'karbo',  n: { energi: 130, protein: 2.4,  lemak: 0.2,  karbo: 28.6, serat: 0.4, kalsium: 10,  besi: 0.3, vitA: 0,   zinc: 0.5 } },
+    'Nasi merah':            { kat: 'karbo',  n: { energi: 122, protein: 2.6,  lemak: 0.9,  karbo: 25.6, serat: 1.8, kalsium: 12,  besi: 0.5, vitA: 0,   zinc: 0.7 } },
+    'Nasi jagung':           { kat: 'karbo',  n: { energi: 126, protein: 3.1,  lemak: 1.1,  karbo: 26.2, serat: 2.1, kalsium: 14,  besi: 0.6, vitA: 30,  zinc: 0.8 } },
+    'Kentang kukus':         { kat: 'karbo',  n: { energi: 87,  protein: 2.0,  lemak: 0.1,  karbo: 20.1, serat: 1.8, kalsium: 11,  besi: 0.8, vitA: 2,   zinc: 0.3 } },
+    'Telur balado':          { kat: 'hewani', n: { energi: 190, protein: 12.5, lemak: 13.5, karbo: 3.0,  serat: 0.5, kalsium: 60,  besi: 2.0, vitA: 620, zinc: 1.2 } },
+    'Ayam bumbu kuning':     { kat: 'hewani', n: { energi: 205, protein: 21.0, lemak: 12.0, karbo: 2.0,  serat: 0.3, kalsium: 24,  besi: 1.3, vitA: 90,  zinc: 1.8 } },
+    'Ikan lele goreng':      { kat: 'hewani', n: { energi: 178, protein: 18.5, lemak: 10.5, karbo: 1.0,  serat: 0,   kalsium: 62,  besi: 1.1, vitA: 60,  zinc: 1.1 } },
+    'Ikan tongkol suwir':    { kat: 'hewani', n: { energi: 168, protein: 22.0, lemak: 7.5,  karbo: 1.5,  serat: 0.2, kalsium: 45,  besi: 1.6, vitA: 40,  zinc: 1.0 } },
+    'Telur dadar sayur':     { kat: 'hewani', n: { energi: 175, protein: 11.8, lemak: 12.2, karbo: 3.5,  serat: 0.7, kalsium: 68,  besi: 1.9, vitA: 540, zinc: 1.1 } },
+    'Tempe orek':            { kat: 'nabati', n: { energi: 210, protein: 18.5, lemak: 10.5, karbo: 12.0, serat: 3.0, kalsium: 160, besi: 3.5, vitA: 10,  zinc: 1.6 } },
+    'Tahu bacem':            { kat: 'nabati', n: { energi: 148, protein: 12.0, lemak: 8.0,  karbo: 7.5,  serat: 1.2, kalsium: 210, besi: 2.6, vitA: 5,   zinc: 1.1 } },
+    'Tempe mendoan':         { kat: 'nabati', n: { energi: 224, protein: 16.0, lemak: 13.0, karbo: 13.5, serat: 2.6, kalsium: 140, besi: 3.1, vitA: 8,   zinc: 1.4 } },
+    'Perkedel tahu':         { kat: 'nabati', n: { energi: 165, protein: 10.5, lemak: 9.5,  karbo: 9.0,  serat: 1.4, kalsium: 180, besi: 2.2, vitA: 20,  zinc: 1.0 } },
+    'Sayur bening bayam':    { kat: 'sayur',  n: { energi: 40,  protein: 3.0,  lemak: 0.6,  karbo: 6.0,  serat: 2.5, kalsium: 120, besi: 2.8, vitA: 200, zinc: 0.5 } },
+    'Tumis kangkung':        { kat: 'sayur',  n: { energi: 52,  protein: 2.6,  lemak: 2.2,  karbo: 5.4,  serat: 2.1, kalsium: 88,  besi: 2.3, vitA: 315, zinc: 0.4 } },
+    'Capcay sayur':          { kat: 'sayur',  n: { energi: 58,  protein: 2.2,  lemak: 2.6,  karbo: 6.8,  serat: 2.4, kalsium: 64,  besi: 1.4, vitA: 260, zinc: 0.4 } },
+    'Sop wortel buncis':     { kat: 'sayur',  n: { energi: 44,  protein: 1.8,  lemak: 1.2,  karbo: 7.2,  serat: 2.2, kalsium: 46,  besi: 0.9, vitA: 480, zinc: 0.3 } },
+    'Urap sayur':            { kat: 'sayur',  n: { energi: 78,  protein: 3.4,  lemak: 4.2,  karbo: 7.0,  serat: 3.1, kalsium: 132, besi: 2.0, vitA: 230, zinc: 0.6 } },
+    'Semangka':              { kat: 'buah',   n: { energi: 30,  protein: 0.6,  lemak: 0.2,  karbo: 7.6,  serat: 0.4, kalsium: 7,   besi: 0.2, vitA: 13,  zinc: 0.1 } },
+    'Pisang ambon':          { kat: 'buah',   n: { energi: 92,  protein: 1.0,  lemak: 0.3,  karbo: 23.4, serat: 2.6, kalsium: 8,   besi: 0.3, vitA: 3,   zinc: 0.2 } },
+    'Jeruk manis':           { kat: 'buah',   n: { energi: 47,  protein: 0.9,  lemak: 0.1,  karbo: 11.8, serat: 2.4, kalsium: 40,  besi: 0.1, vitA: 11,  zinc: 0.1 } },
+    'Pepaya':                { kat: 'buah',   n: { energi: 39,  protein: 0.6,  lemak: 0.1,  karbo: 9.8,  serat: 1.8, kalsium: 24,  besi: 0.3, vitA: 55,  zinc: 0.1 } },
+    'Melon':                 { kat: 'buah',   n: { energi: 34,  protein: 0.8,  lemak: 0.2,  karbo: 8.2,  serat: 0.9, kalsium: 9,   besi: 0.2, vitA: 169, zinc: 0.2 } },
+    'Susu UHT':              { kat: 'susu',   n: { energi: 61,  protein: 3.2,  lemak: 3.3,  karbo: 4.8,  serat: 0,   kalsium: 120, besi: 0.1, vitA: 46,  zinc: 0.4 } },
+  };
+
+  const categories = [
+    { id: 'karbo',  label: 'Sumber karbohidrat' },
+    { id: 'hewani', label: 'Lauk hewani' },
+    { id: 'nabati', label: 'Lauk nabati' },
+    { id: 'sayur',  label: 'Sayur' },
+    { id: 'buah',   label: 'Buah' },
+    { id: 'susu',   label: 'Susu' },
   ];
 
-  // ---------- collaboration cards (per-unit, "Berpartner dengan") ----------
-  const collaborators = [
-    { name: 'Lembaga Riset Pangan', icon: 'sheet', desc: 'Riset formulasi gizi & keamanan pangan lokal.' },
-    { name: 'Pusat Inovasi AgriTech', icon: 'seedling', desc: 'Teknologi pertanian & efisiensi rantai pasok.' },
-    { name: 'Yayasan Gizi', icon: 'heart', desc: 'Edukasi gizi keluarga & pendampingan balita.' },
-    { name: 'Komunitas Petani Muda', icon: 'leaf', desc: 'Pasokan komoditas segar dari petani sekitar.' },
-    { name: 'Institut Ketahanan Pangan', icon: 'shield', desc: 'Kajian ketahanan & kemandirian pangan wilayah.' },
-    { name: 'Forum Rantai Pasok', icon: 'truck', desc: 'Koordinasi logistik & distribusi antar-mitra.' },
-  ];
+  /* ============================================================
+     4. DATE HELPERS — weekdays only (kitchens closed on weekends)
+     ============================================================ */
+  const DAY_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const MON_ID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const MON_FULL = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
-  // ---------- menu history (shared template, lightly varied per unit) ----------
+  const pad = (n) => String(n).padStart(2, '0');
+  const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+  function fmtDate(isoStr, style) {
+    const d = new Date(isoStr + 'T00:00:00');
+    if (style === 'long')  return `${DAY_ID[d.getDay()]}, ${d.getDate()} ${MON_FULL[d.getMonth()]} ${d.getFullYear()}`;
+    if (style === 'short') return `${d.getDate()} ${MON_ID[d.getMonth()]}`;
+    return `${d.getDate()} ${MON_ID[d.getMonth()]} ${d.getFullYear()}`;
+  }
+  /* N most recent weekdays ending at `endIso`, oldest first */
+  function weekdaysBack(endIso, n) {
+    const out = [];
+    const d = new Date(endIso + 'T00:00:00');
+    while (out.length < n) {
+      const dow = d.getDay();
+      if (dow !== 0 && dow !== 6) out.push(iso(d));
+      d.setDate(d.getDate() - 1);
+    }
+    return out.reverse();
+  }
+
+  const LAST_MENU_DATE = '2026-07-21';
+  const ASOF = '21 Juli 2026, 09:15 WIB';
+
+  /* ============================================================
+     5. DETERMINISTIC PRNG — stable mock data across reloads
+     ============================================================ */
+  function rng(seed) {
+    let s = seed >>> 0;
+    return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  }
+  /* cheap, stable content fingerprint (§4.1) — NOT cryptographic;
+     stands in for the real hash a server would compute */
+  function fingerprint(obj) {
+    const str = JSON.stringify(obj);
+    let h1 = 0x811c9dc5, h2 = 0x01000193;
+    for (let i = 0; i < str.length; i++) {
+      h1 ^= str.charCodeAt(i); h1 = Math.imul(h1, 16777619) >>> 0;
+      h2 = (h2 + str.charCodeAt(i) * (i + 7)) >>> 0; h2 = Math.imul(h2, 2246822519) >>> 0;
+    }
+    return (h1.toString(16).padStart(8, '0') + h2.toString(16).padStart(8, '0')).slice(0, 16);
+  }
+
+  /* ============================================================
+     6. MENU LIBRARY — component sets; nutrition computed from TKPI
+     ============================================================ */
   const menuLibrary = [
-    { name: 'Nasi, Ayam Bumbu Kuning, Tumis Buncis, Pisang, Susu', img: 'ayam-kuning', kalori: 720, protein: 32, lemak: 18, karbo: 98, rating: 4.8 },
-    { name: 'Nasi, Ikan Sei Timor, Cah Kangkung, Jeruk, Susu', img: 'ikan-sei', kalori: 690, protein: 34, lemak: 16, karbo: 92, rating: 4.7 },
-    { name: 'Nasi, Telur Balado, Sayur Sop, Semangka, Susu', img: 'telur-balado', kalori: 660, protein: 28, lemak: 17, karbo: 95, rating: 4.6 },
-    { name: 'Nasi, Tahu Tempe Bacem, Bayam Bening, Pepaya, Susu', img: 'tahu-tempe', kalori: 640, protein: 26, lemak: 14, karbo: 99, rating: 4.5 },
-    { name: 'Nasi, Daging Semur, Tumis Labu Siam, Melon, Susu', img: 'daging-semur', kalori: 740, protein: 35, lemak: 20, karbo: 96, rating: 4.9 },
-    { name: 'Nasi, Ayam Teriyaki, Capcay, Pisang, Susu', img: 'ayam-teriyaki', kalori: 710, protein: 31, lemak: 19, karbo: 97, rating: 4.7 },
-    { name: 'Nasi, Ikan Tongkol Suwir, Urap Sayur, Jeruk, Susu', img: 'tongkol-suwir', kalori: 680, protein: 33, lemak: 15, karbo: 93, rating: 4.6 },
-    { name: 'Nasi, Rendang Telur, Tumis Wortel, Pisang, Susu', img: 'rendang-telur', kalori: 705, protein: 29, lemak: 18, karbo: 96, rating: 4.8 },
+    { name: 'Nasi putih · Telur balado · Tempe orek',      items: [['Nasi putih', 150], ['Telur balado', 55], ['Tempe orek', 40], ['Sayur bening bayam', 70], ['Semangka', 100]] },
+    { name: 'Nasi putih · Ayam bumbu kuning · Tahu bacem', items: [['Nasi putih', 150], ['Ayam bumbu kuning', 60], ['Tahu bacem', 50], ['Tumis kangkung', 75], ['Pisang ambon', 90]] },
+    { name: 'Nasi merah · Ikan lele · Tempe mendoan',      items: [['Nasi merah', 150], ['Ikan lele goreng', 60], ['Tempe mendoan', 45], ['Sop wortel buncis', 80], ['Jeruk manis', 100]] },
+    { name: 'Nasi putih · Tongkol suwir · Perkedel tahu',  items: [['Nasi putih', 155], ['Ikan tongkol suwir', 55], ['Perkedel tahu', 45], ['Capcay sayur', 80], ['Pepaya', 100], ['Susu UHT', 100]] },
+    { name: 'Nasi jagung · Telur dadar · Tahu bacem',      items: [['Nasi jagung', 150], ['Telur dadar sayur', 60], ['Tahu bacem', 45], ['Urap sayur', 70], ['Melon', 100]] },
+    { name: 'Nasi putih · Ayam bumbu kuning · Tempe orek', items: [['Nasi putih', 150], ['Ayam bumbu kuning', 55], ['Tempe orek', 45], ['Capcay sayur', 75], ['Pisang ambon', 85]] },
+    { name: 'Kentang kukus · Ikan lele · Perkedel tahu',   items: [['Kentang kukus', 160], ['Ikan lele goreng', 65], ['Perkedel tahu', 45], ['Sop wortel buncis', 80], ['Semangka', 110]] },
+    { name: 'Nasi merah · Telur balado · Tahu bacem',      items: [['Nasi merah', 150], ['Telur balado', 55], ['Tahu bacem', 50], ['Tumis kangkung', 70], ['Jeruk manis', 95], ['Susu UHT', 100]] },
   ];
 
-  function menuHistory(seed, days) {
+  /* compute one menu's nutrition totals from its components */
+  function buildMenu(kitchenCode, dateIso, libIdx, lockMeta) {
+    const lib = menuLibrary[libIdx % menuLibrary.length];
+    const components = lib.items.map(([name, gram]) => {
+      const food = tkpi[name];
+      const n = {};
+      NKEYS.forEach(k => { n[k] = +(food.n[k] * gram / 100).toFixed(2); });
+      return { name, gram, kat: food.kat, katLabel: (categories.find(c => c.id === food.kat) || {}).label, n };
+    });
+    const total = {};
+    NKEYS.forEach(k => { total[k] = +components.reduce((s, c) => s + c.n[k], 0).toFixed(1); });
+    const beratTotal = components.reduce((s, c) => s + c.gram, 0);
+
+    const rec = {
+      kitchenCode, date: dateIso, name: lib.name,
+      components, total, beratTotal,
+      lockedAt: lockMeta.at, lockedBy: lockMeta.by, source: lockMeta.source,
+    };
+    rec.hash = fingerprint({ k: kitchenCode, d: dateIso, c: components.map(c => [c.name, c.gram]) });
+    return rec;
+  }
+
+  /* ============================================================
+     7. KITCHENS (§2.3) — 3 units, Malang Raya
+     ============================================================ */
+  const kitchenCfg = [
+    {
+      slug: 'kedungkandang', code: 'KDK-01', name: 'SPPG Kedungkandang', status: 'BEROPERASI',
+      region: 'Kota Malang', district: 'Kedungkandang', village: 'Buring', province: 'Jawa Timur',
+      address: 'Jl. Ki Ageng Gribig No. 142, Kedungkandang, Kota Malang, Jawa Timur 65137',
+      lat: -8.0092, lng: 112.6621,
+      pic: 'Siti Rahmawati', pm: 2840, capacity: 3000, schools: 12,
+      since: '2026-02-16', operatingDays: 108, menuDays: 22, seed: 11, missing: [],
+    },
+    {
+      slug: 'singosari', code: 'SGS-02', name: 'SPPG Singosari', status: 'BEROPERASI',
+      region: 'Kabupaten Malang', district: 'Singosari', village: 'Losari', province: 'Jawa Timur',
+      address: 'Jl. Raya Randuagung No. 27, Singosari, Kabupaten Malang, Jawa Timur 65153',
+      lat: -7.8931, lng: 112.6647,
+      pic: 'Bambang Priyanto', pm: 2310, capacity: 2600, schools: 13,
+      since: '2026-05-11', operatingDays: 50, menuDays: 20, seed: 23,
+      missing: ['2026-07-14', '2026-07-17', '2026-07-20', '2026-07-21'],
+    },
+    {
+      slug: 'kepanjen', code: 'KPJ-03', name: 'SPPG Kepanjen', status: 'PERSIAPAN',
+      region: 'Kabupaten Malang', district: 'Kepanjen', village: 'Panggungrejo', province: 'Jawa Timur',
+      address: 'Jl. Panji No. 88, Kepanjen, Kabupaten Malang, Jawa Timur 65163',
+      lat: -8.1310, lng: 112.5710,
+      pic: 'Nurul Aisyah', pm: 0, capacity: 2500, schools: 0,
+      since: null, plannedStart: '2026-09-01', operatingDays: 0, menuDays: 0, seed: 31, missing: [],
+    },
+  ];
+
+  function certsFor(cfg) {
+    if (cfg.status !== 'BEROPERASI') return [];
+    return [
+      { name: 'Laik Higiene Sanitasi Jasaboga', issuer: 'Dinas Kesehatan ' + cfg.region,
+        number: `503/SLHS/${cfg.code}/2026`, validUntil: '12 Des 2026', status: 'Aktif' },
+      { name: 'Sertifikat Halal', issuer: 'BPJPH',
+        number: `ID31${cfg.code.replace('-', '')}0026`, validUntil: '30 Sep 2027', status: 'Aktif' },
+    ];
+  }
+
+  function schoolsFor(cfg) {
+    if (cfg.status !== 'BEROPERASI') return [];
+    const r = rng(cfg.seed * 7);
+    const types = ['SDN', 'SDN', 'SMPN', 'MI', 'TK'];
     const out = [];
-    const base = new Date(2026, 5, 6); // 6 Jun 2026
-    for (let i = 0; i < days; i++) {
-      const m = menuLibrary[(seed + i) % menuLibrary.length];
-      const d = new Date(base); d.setDate(base.getDate() - i);
+    let left = cfg.pm;
+    for (let i = 0; i < cfg.schools; i++) {
+      const last = i === cfg.schools - 1;
+      const share = last ? left : Math.round(cfg.pm / cfg.schools * (0.75 + r() * 0.5));
+      left -= share;
       out.push({
-        ...m,
-        date: d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
-        img: food(m.img),
+        name: `${types[i % types.length]} ${cfg.district} ${String(i + 1).padStart(2, '0')}`,
+        pm: Math.max(share, 40),
+        distanceKm: +(1.2 + r() * 8).toFixed(1),
       });
     }
     return out;
   }
 
-  const todayComponents = [
-    { label: 'Karbohidrat', value: 'Nasi putih', gram: 150, icon: 'wheat' },
-    { label: 'Lauk', value: 'Ayam bumbu kuning', gram: 80, icon: 'utensils' },
-    { label: 'Pauk', value: 'Tahu goreng', gram: 40, icon: 'box' },
-    { label: 'Sayuran', value: 'Tumis buncis', gram: 60, icon: 'leaf' },
-    { label: 'Buah', value: 'Pisang ambon', gram: 100, icon: 'apple' },
-    { label: 'Susu', value: 'Susu UHT', gram: 200, icon: 'milk' },
-  ];
+  function galleryFor(cfg) {
+    if (cfg.status !== 'BEROPERASI') return [];
+    const cats = [
+      ['bangunan', 'Bangunan dapur'], ['bangunan', 'Area penerimaan bahan'],
+      ['masak', 'Area memasak'], ['masak', 'Pengemasan porsi'],
+      ['distribusi', 'Muat ompreng ke kendaraan'], ['distribusi', 'Distribusi ke sekolah'],
+    ];
+    return cats.map((c, i) => ({
+      src: `assets/img/gallery/${cfg.slug}-${i + 1}.jpg`,
+      category: c[0], title: c[1],
+      caption: `${c[1]} — ${cfg.name}. Foto dokumentasi ilustratif.`,
+      uploadedAt: '2026-06-18', uploadedBy: cfg.pic,
+    }));
+  }
 
-  // ---------- suppliers (per-unit template) ----------
-  const supplierBase = [
-    { item: 'Beras Premium', cat: 'Karbohidrat', qty: 480, unit: 'kg', supplier: 'Koperasi Tani Makmur', region: 'Malang', thumb: 'wheat' },
-    { item: 'Ayam Broiler', cat: 'Protein', qty: 210, unit: 'kg', supplier: 'Japfa Comfeed', region: 'Jawa Timur', thumb: 'utensils' },
-    { item: 'Telur Ayam', cat: 'Protein', qty: 1200, unit: 'butir', supplier: 'Peternakan Sumber Rejeki', region: 'Malang', thumb: 'utensils' },
-    { item: 'Ikan Tongkol', cat: 'Protein', qty: 160, unit: 'kg', supplier: 'TPI Sendang Biru', region: 'Malang', thumb: 'droplet' },
-    { item: 'Bayam Segar', cat: 'Sayuran', qty: 90, unit: 'kg', supplier: 'Kelompok Tani Hijau', region: 'Batu', thumb: 'leaf' },
-    { item: 'Buncis', cat: 'Sayuran', qty: 75, unit: 'kg', supplier: 'Petani Mitra Poncokusumo', region: 'Malang', thumb: 'leaf' },
-    { item: 'Wortel', cat: 'Sayuran', qty: 110, unit: 'kg', supplier: 'Pasar Tani Karangploso', region: 'Malang', thumb: 'leaf' },
-    { item: 'Pisang Ambon', cat: 'Buah-buahan', qty: 1400, unit: 'buah', supplier: 'Gapoktan Buah Sejahtera', region: 'Malang', thumb: 'apple' },
-    { item: 'Jeruk Manis', cat: 'Buah-buahan', qty: 95, unit: 'kg', supplier: 'Sentra Jeruk Dau', region: 'Malang', thumb: 'apple' },
-    { item: 'Tahu', cat: 'Kacang-kacangan', qty: 70, unit: 'kg', supplier: 'UKM Tahu Sumedang', region: 'Malang', thumb: 'box' },
-    { item: 'Tempe', cat: 'Kacang-kacangan', qty: 68, unit: 'kg', supplier: 'Sentra Tempe Sanan', region: 'Malang', thumb: 'box' },
-    { item: 'Susu UHT', cat: 'Susu', qty: 1490, unit: 'kotak', supplier: 'Koperasi Susu SAE', region: 'Pujon', thumb: 'milk' },
-    { item: 'Minyak Goreng', cat: 'Lainnya', qty: 60, unit: 'liter', supplier: 'Distributor Sembako Jaya', region: 'Malang', thumb: 'droplet' },
-    { item: 'Bumbu & Rempah', cat: 'Rempah', qty: 45, unit: 'kg', supplier: 'Pasar Besar Malang', region: 'Malang', thumb: 'flame' },
-  ];
-
-  // ---------- testimonials (per-unit template) ----------
-  const testimonialBase = [
-    { name: 'Putri Anggraini', role: 'Siswa SDN Sukun 1', tag: 'Siswa', quote: 'Makanannya enak dan selalu ada buah. Sekarang aku jarang sakit dan lebih semangat belajar.', avatar: 'siswa-1', highlight: 'Lebih semangat belajar' },
-    { name: 'Ibu Sulastri', role: 'Orang Tua Murid', tag: 'Orang Tua', quote: 'Anak saya jadi lebih lahap makan sayur. Program ini sangat membantu keluarga kami.', avatar: 'ortu-1', highlight: 'Anak lebih sehat' },
-    { name: 'Bapak Hadi Santoso', role: 'Pemasok Sayur Lokal', tag: 'Supplier', quote: 'Dapur SPPG menyerap hasil panen kami secara rutin. Pendapatan kelompok tani jadi lebih stabil.', avatar: 'supplier-1', highlight: 'Pendapatan tani stabil' },
-    { name: 'Ibu Retno Wulandari', role: 'Guru SDN Sukun 2', tag: 'Guru', quote: 'Konsentrasi siswa di kelas meningkat setelah program makan bergizi berjalan.', avatar: 'guru-1', highlight: 'Konsentrasi meningkat' },
-    { name: 'Siti Aminah', role: 'Juru Masak SPPG', tag: 'Pekerja SPPG', quote: 'Bangga bisa memasak untuk ribuan anak setiap hari dengan standar kebersihan yang ketat.', avatar: 'pekerja-1', highlight: 'Standar higienis' },
-    { name: 'Drs. Bambang Wijaya', role: 'Dinas Pendidikan Kota Malang', tag: 'Pemerintah Daerah', quote: 'Koordinasi data antar-sekolah jauh lebih rapi dan transparan dengan dashboard ini.', avatar: 'gov-1', highlight: 'Data transparan' },
-    { name: 'Maria Lopez', role: 'Field Officer WFP', tag: 'Lembaga Internasional', quote: 'Standar gizi dan pencatatan di dapur ini sejalan dengan praktik terbaik internasional.', avatar: 'intl-1', highlight: 'Sesuai standar global' },
-  ];
-
-  // ---------- schools (per-unit generator) ----------
-  function schools(prefix, n, basePm) {
-    const types = ['SD', 'SD', 'SMP', 'TK', 'SMA', 'SMK', 'SD', 'Ponpes', 'SMP'];
+  /* build menus per kitchen — a missing date means never locked, so never published */
+  function menusFor(cfg) {
+    if (cfg.status !== 'BEROPERASI') return [];
+    const dates = weekdaysBack(LAST_MENU_DATE, cfg.menuDays + cfg.missing.length);
     const out = [];
-    for (let i = 0; i < n; i++) {
-      const siswa = basePm + ((i * 37) % 120) - 40;
-      out.push({
-        name: `${types[i % types.length]} ${prefix} ${i + 1}`,
-        type: types[i % types.length],
-        guru: 8 + ((i * 3) % 14),
-        siswa: siswa,
-        pm: siswa,
-        jarakKm: +(1.2 + ((i * 1.7) % 9)).toFixed(1),
-        waktu: 6 + ((i * 4) % 22),
-      });
-    }
+    dates.forEach((d, i) => {
+      if (cfg.missing.indexOf(d) !== -1) return;
+      out.push(buildMenu(cfg.code, d, cfg.seed + i, {
+        at: `${fmtDate(d)} 14:32 WIB`, by: cfg.pic, source: 'Unggah berkas (XLSX)',
+      }));
+    });
     return out;
   }
 
-  function healthFacilities(prefix) {
-    return [
-      { name: `Posyandu ${prefix} Melati`, type: 'Posyandu', ibuHamil: 18, balita: 64, pm: 82, jarakKm: 2.1, waktu: 9 },
-      { name: `Posyandu ${prefix} Mawar`, type: 'Posyandu', ibuHamil: 14, balita: 52, pm: 66, jarakKm: 3.4, waktu: 12 },
-      { name: `Puskesmas ${prefix}`, type: 'Puskesmas', ibuHamil: 31, balita: 88, pm: 119, jarakKm: 4.8, waktu: 16 },
-    ];
-  }
-
-  // ---------- team (role-based, no personal PII) ----------
-  function team(area) {
-    const slugArea = area.toLowerCase();
-    return [
-      { name: 'Kepala SPPG', group: 'Manajemen', title: `Kepala Unit SPPG ${area}`, contact: `kepala.sppg.${slugArea}@edufarmers.org`, location: area, spotlight: true },
-      { name: 'Ahli Gizi', group: 'Gizi & Mutu', title: 'Nutritionist / Quality Control', contact: `gizi.${slugArea}@edufarmers.org`, location: area },
-      { name: 'Koordinator Dapur', group: 'Operasional', title: 'Kitchen Coordinator', contact: `dapur.${slugArea}@edufarmers.org`, location: area },
-      { name: 'Koordinator Distribusi', group: 'Operasional', title: 'Distribution Lead', contact: `distribusi.${slugArea}@edufarmers.org`, location: area },
-      { name: 'Admin & Pelaporan', group: 'Administrasi', title: 'Data & Reporting Officer', contact: `admin.${slugArea}@edufarmers.org`, location: area },
-      { name: 'Penanggung Jawab Higiene', group: 'Gizi & Mutu', title: 'Food Safety Officer (HACCP)', contact: `higiene.${slugArea}@edufarmers.org`, location: area },
-    ];
-  }
-
-  // ---------- impact (illustrative) ----------
-  function impact(area, pm) {
+  const kitchens = kitchenCfg.map(cfg => {
+    const active = cfg.status === 'BEROPERASI';
+    const menus = menusFor(cfg);
     return {
-      sroi: '1 : 3,8',
-      sroiNote: 'Setiap Rp 1 yang diinvestasikan menghasilkan estimasi Rp 3,8 nilai sosial.',
-      cba: {
-        pengertian: 'Analisis Biaya-Manfaat (Cost-Benefit Analysis) membandingkan total biaya program dengan nilai manfaat sosial-ekonomi yang dihasilkan bagi penerima manfaat dan masyarakat sekitar.',
-        manfaat: 'Membantu pengambil keputusan menilai efisiensi dan dampak program secara objektif, serta menjadi dasar alokasi surplus operasi MBG ke program ZeroStunting.',
-      },
-      economicModel: [
-        { label: 'Transfer Nilai ke Rumah Tangga', value: 'Rp 1,2 Miliar', icon: 'coins', note: 'Penghematan belanja pangan keluarga / tahun' },
-        { label: 'Return on Investment', value: '3,8×', icon: 'trendUp', note: 'Rasio manfaat terhadap biaya' },
-        { label: 'Dampak Spillover', value: 'Rp 380 Juta', icon: 'handshake', note: 'Perputaran ekonomi pemasok lokal' },
-        { label: 'Peningkatan Kesehatan', value: '+16%', icon: 'heart', note: 'Estimasi penurunan prevalensi kurang gizi' },
-        { label: 'Peningkatan Pendapatan', value: '+11%', icon: 'seedling', note: 'Pendapatan petani & UKM mitra' },
-      ],
-      sdg: [
-        { no: 1, label: 'Tanpa Kemiskinan', stat: 'Rp 1,2 M transfer nilai', icon: 'coins', color: '#E5243B' },
-        { no: 2, label: 'Tanpa Kelaparan', stat: `${pm.toLocaleString('id-ID')} PM/hari`, icon: 'wheat', color: '#DDA63A' },
-        { no: 3, label: 'Kehidupan Sehat', stat: '+16% status gizi', icon: 'heart', color: '#4C9F38' },
-        { no: 4, label: 'Pendidikan Berkualitas', stat: '9+ sekolah dilayani', icon: 'book', color: '#C5192D' },
-        { no: 5, label: 'Kesetaraan Gender', stat: '62% staf perempuan', icon: 'users', color: '#FF3A21' },
-        { no: 8, label: 'Pekerjaan Layak', stat: '38 lapangan kerja', icon: 'handshake', color: '#A21942' },
-        { no: 12, label: 'Produksi Bertanggung Jawab', stat: '74% komoditas lokal', icon: 'leaf', color: '#BF8B2E' },
-      ],
-      theory: [
-        { stage: 'Activities', text: 'Produksi & distribusi makan bergizi harian, pengadaan komoditas lokal.' },
-        { stage: 'Output', text: `${pm.toLocaleString('id-ID')} porsi/hari, 9+ sekolah, pemasok lokal terserap.` },
-        { stage: 'Outcome', text: 'Perbaikan asupan gizi, kehadiran sekolah, pendapatan petani.' },
-        { stage: 'Impact', text: 'Penurunan stunting & pendanaan berkelanjutan program ZeroStunting.' },
-      ],
-      nonQuant: [
-        { title: 'Kohesi Sosial', text: 'Gotong royong sekolah, orang tua, dan pemasok di sekitar dapur.' },
-        { title: 'Kesadaran Gizi', text: 'Edukasi pola makan seimbang menyebar ke keluarga penerima.' },
-        { title: 'Martabat & Kesetaraan', text: 'Akses gizi setara bagi seluruh siswa tanpa memandang latar ekonomi.' },
-      ],
-      roi: {
-        cost: [
-          { label: 'Bahan baku & komoditas', value: 62 },
-          { label: 'Tenaga kerja dapur', value: 21 },
-          { label: 'Logistik & distribusi', value: 10 },
-          { label: 'Utilitas & operasional', value: 7 },
-        ],
-        benefit: [
-          { label: 'Transfer nilai rumah tangga', value: 44 },
-          { label: 'Nilai kesehatan & gizi', value: 28 },
-          { label: 'Perputaran ekonomi lokal', value: 18 },
-          { label: 'Nilai pendidikan & kehadiran', value: 10 },
-        ],
-      },
-      monthlyFlow: 'Rp 1,49 Miliar',
-      commodity: [
-        { item: 'Beras', value: 'Rp 312 Juta', share: '21%' },
-        { item: 'Protein hewani', value: 'Rp 468 Juta', share: '31%' },
-        { item: 'Sayur & buah', value: 'Rp 358 Juta', share: '24%' },
-        { item: 'Susu', value: 'Rp 268 Juta', share: '18%' },
-        { item: 'Lainnya', value: 'Rp 84 Juta', share: '6%' },
-      ],
-      zerostunting: {
-        area,
-        allocated: area === 'Simalungun' ? 'Rp 58 Juta' : 'Rp 96 Juta',
-        note: `Surplus operasi MBG dialokasikan untuk program ZeroStunting wilayah ${area}.`,
-      },
+      slug: cfg.slug, code: cfg.code, name: cfg.name, status: cfg.status,
+      region: cfg.region, district: cfg.district, village: cfg.village, province: cfg.province,
+      address: cfg.address, lat: cfg.lat, lng: cfg.lng, pic: cfg.pic,
+      since: cfg.since, sinceLabel: active ? fmtDate(cfg.since) : null,
+      plannedStart: cfg.plannedStart || null,
+      plannedStartLabel: cfg.plannedStart ? fmtDate(cfg.plannedStart) : null,
+      pm: cfg.pm, capacity: cfg.capacity, schoolCount: cfg.schools,
+      utilization: active ? Math.round(cfg.pm / cfg.capacity * 100) : null,
+      operatingDays: cfg.operatingDays,
+      porsiKumulatif: cfg.operatingDays * cfg.pm,
+      certs: certsFor(cfg),
+      schools: schoolsFor(cfg),
+      gallery: galleryFor(cfg),
+      menus,
+      menuDates: menus.map(m => m.date),
+      missingDates: cfg.missing,
     };
-  }
-
-  // ---------- recipes ----------
-  const recipes = [
-    { name: 'Ayam Bumbu Kuning Khas SPPG', chef: 'Kepala SPPG Sukun', kalori: 320, protein: 28, lemak: 12, karbo: 8, waktu: 45, img: rec('ayam-kuning') },
-    { name: 'Ikan Sei Timor Panggang', chef: 'Kepala SPPG Simalungun', kalori: 290, protein: 30, lemak: 9, karbo: 6, waktu: 50, img: rec('ikan-sei') },
-    { name: 'Tahu Tempe Bacem Manis', chef: 'Koordinator Dapur', kalori: 240, protein: 18, lemak: 10, karbo: 14, waktu: 35, img: rec('tahu-tempe') },
-    { name: 'Urap Sayur Tujuh Warna', chef: 'Ahli Gizi SPPG', kalori: 180, protein: 7, lemak: 8, karbo: 16, waktu: 25, img: rec('urap') },
-    { name: 'Semur Daging Kentang', chef: 'Kepala SPPG Donomulyo', kalori: 360, protein: 26, lemak: 16, karbo: 20, waktu: 60, img: rec('semur') },
-  ];
-
-  // ---------- gallery ----------
-  function gallery(slug) {
-    const cats = ['dapur', 'masak', 'kemas', 'distribusi'];
-    const labels = { dapur: 'Dapur Utama', masak: 'Proses Memasak', kemas: 'Lini Pengemasan', distribusi: 'Distribusi ke Sekolah' };
-    const photos = cats.map((c, i) => ({ src: gal(`${slug}-${c}`), cat: c, caption: labels[c] }));
-    return {
-      photos,
-      videos: [{ src: gal(`${slug}-video`), caption: 'Liputan harian operasi dapur' }],
-      cams: [
-        { label: 'Dapur Utama', tag: 'CAM 1' },
-        { label: 'Gudang Bahan', tag: 'CAM 2' },
-        { label: 'Area Masak', tag: 'CAM 3' },
-        { label: 'Lini Pengemasan', tag: 'CAM 4' },
-      ],
-    };
-  }
-
-  // ---------- unit builder ----------
-  function buildUnit(cfg) {
-    const active = cfg.status === 'AKTIF';
-    const pm = cfg.pm || 0;
-    const nSchools = cfg.schools || 9;
-    return {
-      slug: cfg.slug,
-      name: cfg.name,
-      status: cfg.status,
-      area: cfg.area,
-      province: cfg.province,
-      address: cfg.address,
-      operatingSince: active ? '23 Feb 2026' : '—',
-      monthsServing: active ? 3 : 0,
-      operatingHours: active ? '05:30 – 14:00 WIB' : 'Belum beroperasi',
-      capacity: cfg.capacity,
-      scheme: 'Rp 13.000 / pax / hari · Insentif Rp 6 jt / hari',
-      mitra: ['Edufarmers', 'BGN', 'WFP'],
-      certs: active
-        ? { slhs: { status: true, validUntil: '12 Des 2026' }, halal: { status: true, validUntil: '30 Sep 2026' }, haccp: { status: true, validUntil: '18 Mar 2027' } }
-        : { slhs: { status: false }, halal: { status: false }, haccp: { status: false } },
-      stats: {
-        pmHarian: pm,
-        sekolah: active ? nSchools : 0,
-        posyandu: active ? 3 : 0,
-        staf: active ? 24 : 0,
-        relawan: active ? 12 : 0,
-        supplier: active ? 14 : 0,
-        porsiKumulatif: active ? cfg.kumulatif : 0,
-        porsiHariIni: active ? pm : 0,
-      },
-      beneficiaries: active ? {
-        total: pm,
-        siswa: Math.round(pm * 0.84),
-        ibu: Math.round(pm * 0.06),
-        balita: pm - Math.round(pm * 0.84) - Math.round(pm * 0.06),
-        desc: {
-          siswa: 'TK, SD, SMP, SMA/SMK, dan Pondok Pesantren di wilayah layanan.',
-          ibu: 'Ibu hamil & menyusui terdaftar di Posyandu mitra.',
-          balita: 'Balita di Posyandu untuk pencegahan stunting sejak dini.',
-        },
-      } : { total: 0, siswa: 0, ibu: 0, balita: 0, desc: {} },
-      menuToday: active ? {
-        img: food(`${cfg.slug}-today`),
-        name: menuLibrary[0].name,
-        date: '7 Jun 2026',
-        nutrition: { kalori: 720, protein: 32, lemak: 18, karbo: 98 },
-        components: todayComponents,
-      } : null,
-      menuHist: active ? menuHistory(cfg.seed, 8) : [],
-      recipes: active ? recipes : [],
-      gallery: gallery(cfg.slug),
-      testimonials: active ? testimonialBase : [],
-      schools: active ? schools(cfg.area, nSchools, cfg.basePm || 160) : [],
-      health: active ? healthFacilities(cfg.area) : [],
-      suppliers: active ? supplierBase : [],
-      collaborators,
-      team: active ? team(cfg.area) : [],
-      impact: active ? impact(cfg.area, pm) : null,
-    };
-  }
-
-  const units = [
-    buildUnit({ slug: 'sukun', name: 'SPPG Sukun', area: 'Malang', province: 'Jawa Timur', status: 'AKTIF',
-      address: 'Jl. S. Supriadi No. 45, Sukun, Kota Malang, Jawa Timur', capacity: '1.600 porsi/hari',
-      pm: 1490, schools: 11, basePm: 165, kumulatif: 138420, seed: 0 }),
-    buildUnit({ slug: 'donomulyo', name: 'SPPG Donomulyo', area: 'Malang', province: 'Jawa Timur', status: 'AKTIF',
-      address: 'Jl. Raya Donomulyo No. 12, Kab. Malang, Jawa Timur', capacity: '1.400 porsi/hari',
-      pm: 1212, schools: 9, basePm: 150, kumulatif: 112380, seed: 2 }),
-    buildUnit({ slug: 'poncokusumo', name: 'SPPG Poncokusumo', area: 'Malang', province: 'Jawa Timur', status: 'AKTIF',
-      address: 'Jl. Raya Poncokusumo No. 88, Kab. Malang, Jawa Timur', capacity: '1.300 porsi/hari',
-      pm: 1290, schools: 10, basePm: 158, kumulatif: 119760, seed: 4 }),
-    buildUnit({ slug: 'simalungun', name: 'SPPG Simalungun', area: 'Simalungun', province: 'Sumatera Utara', status: 'AKTIF',
-      address: 'Jl. Asahan KM 4, Pematang Raya, Simalungun, Sumatera Utara', capacity: '1.200 porsi/hari',
-      pm: 1000, schools: 9, basePm: 140, kumulatif: 42120, seed: 1 }),
-    buildUnit({ slug: 'lawang', name: 'SPPG Lawang', area: 'Lawang', province: 'Jawa Timur', status: 'PERSIAPAN',
-      address: 'Jl. Dr. Cipto No. 7, Lawang, Kab. Malang, Jawa Timur', capacity: '1.300 porsi/hari (rencana)',
-      pm: 0, schools: 10, seed: 3 }),
-    buildUnit({ slug: 'karangnongko', name: 'SPPG Karangnongko', area: 'Karangnongko', province: 'Jawa Timur', status: 'PERSIAPAN',
-      address: 'Jl. Karangnongko Raya No. 21, Kab. Malang, Jawa Timur', capacity: '1.200 porsi/hari (rencana)',
-      pm: 0, schools: 9, seed: 5 }),
-  ];
-
-  // map coordinates (normalized 0-100 on a simplified Java/Sumatra inset SVG)
-  const mapCoords = {
-    sukun:        { x: 63.0, y: 70.5 },
-    donomulyo:    { x: 61.6, y: 73.2 },
-    poncokusumo:  { x: 64.6, y: 71.4 },
-    simalungun:   { x: 16.5, y: 30.5 },
-    lawang:       { x: 63.4, y: 68.8 },
-    karangnongko: { x: 62.2, y: 71.9 },
-  };
-  units.forEach(u => u.map = mapCoords[u.slug]);
-
-  // ---------- upload page ----------
-  const formTypes = [
-    'Surat Jalan', 'Pengawasan Pendistribusian', 'Pemeriksaan Bahan Makanan',
-    'Pemantauan Suhu Chiller/Freezer', 'Sampel Pertinggal', 'Uji Organoleptik',
-    'Inventaris Ompreng', 'Persiapan Bahan Baku',
-  ];
-
-  const recentUploads = [
-    { file: 'surat_jalan_07jun.xlsx', type: 'Surat Jalan', time: '7 Jun 2026, 08:21', by: 'Admin Sukun', status: 'Tersimpan' },
-    { file: 'pengawasan_distribusi_07jun.csv', type: 'Pengawasan Pendistribusian', time: '7 Jun 2026, 08:05', by: 'Pengawas Lapangan', status: 'Tersimpan' },
-    { file: 'suhu_chiller_06jun.xlsx', type: 'Pemantauan Suhu Chiller/Freezer', time: '6 Jun 2026, 15:40', by: 'Admin Donomulyo', status: 'Tersimpan' },
-    { file: 'organoleptik_06jun.csv', type: 'Uji Organoleptik', time: '6 Jun 2026, 13:12', by: 'Ahli Gizi', status: 'Diproses' },
-  ];
-
-  // simulated parse results per form type (column -> dashboard target)
-  const parseSamples = {
-    'Surat Jalan': {
-      columns: ['No', 'Tujuan/Sekolah', 'Jumlah Porsi', 'Jam Kirim', 'Petugas', 'Status'],
-      rows: [
-        ['001', 'SDN Sukun 1', '165', '06:10', 'Budi', 'Terkirim'],
-        ['002', 'SDN Sukun 2', '148', '06:25', 'Budi', 'Terkirim'],
-        ['003', 'SMPN Sukun 3', '210', '06:40', 'Sari', 'Terkirim'],
-        ['004', 'TK Sukun 4', '92', '06:55', 'Sari', 'Terkirim'],
-      ],
-      mapping: [
-        { col: 'Jumlah Porsi', target: 'A-12 · Total Porsi Hari Ini', conf: 99 },
-        { col: 'Tujuan/Sekolah', target: 'E-05 · Distribusi per Sekolah', conf: 98 },
-        { col: 'Jam Kirim', target: 'A-04 · Jam Operasional', conf: 92 },
-        { col: 'Status', target: 'E-09 · Status Pengiriman', conf: 95 },
-      ],
-      tiles: ['Total Porsi Hari Ini', 'Distribusi per Sekolah', 'Status Pengiriman'],
-    },
-    'Pengawasan Pendistribusian': {
-      columns: ['Sekolah', 'PM Terlayani', 'Sisa Porsi', 'Waktu Tempuh (mnt)', 'Catatan'],
-      rows: [
-        ['SDN Sukun 1', '165', '0', '8', 'Lancar'],
-        ['SDN Sukun 2', '146', '2', '12', 'Lancar'],
-        ['SMPN Sukun 3', '208', '2', '15', 'Lancar'],
-      ],
-      mapping: [
-        { col: 'PM Terlayani', target: 'B-02 · Penerima Manfaat', conf: 99 },
-        { col: 'Sekolah', target: 'E-05 · Distribusi per Sekolah', conf: 97 },
-        { col: 'Waktu Tempuh (mnt)', target: 'E-07 · Waktu Tempuh', conf: 94 },
-      ],
-      tiles: ['Penerima Manfaat', 'Distribusi per Sekolah', 'Waktu Tempuh'],
-    },
-    'Pemantauan Suhu Chiller/Freezer': {
-      columns: ['Unit', 'Suhu (°C)', 'Waktu Cek', 'Petugas', 'Status'],
-      rows: [
-        ['Chiller 1', '3.8', '05:30', 'Andi', 'Normal'],
-        ['Freezer 1', '-18.2', '05:30', 'Andi', 'Normal'],
-        ['Chiller 2', '4.1', '09:00', 'Andi', 'Normal'],
-      ],
-      mapping: [
-        { col: 'Suhu (°C)', target: 'F-03 · Pemantauan Suhu', conf: 99 },
-        { col: 'Status', target: 'F-04 · Status Keamanan Pangan', conf: 96 },
-      ],
-      tiles: ['Pemantauan Suhu', 'Status Keamanan Pangan'],
-    },
-    'Pemeriksaan Bahan Makanan': {
-      columns: ['Komoditas', 'Jumlah', 'Satuan', 'Pemasok', 'Kondisi'],
-      rows: [
-        ['Beras Premium', '480', 'kg', 'Koperasi Tani Makmur', 'Baik'],
-        ['Ayam Broiler', '210', 'kg', 'Japfa Comfeed', 'Baik'],
-        ['Bayam Segar', '90', 'kg', 'Kelompok Tani Hijau', 'Baik'],
-      ],
-      mapping: [
-        { col: 'Komoditas', target: 'D-01 · Manajemen Pemasok', conf: 98 },
-        { col: 'Jumlah', target: 'D-02 · Jumlah Komoditas', conf: 99 },
-        { col: 'Pemasok', target: 'D-03 · Pemasok Aktif', conf: 97 },
-      ],
-      tiles: ['Manajemen Pemasok', 'Jumlah Komoditas', 'Pemasok Aktif'],
-    },
-  };
-
-  // default parse sample for any other form type
-  ['Sampel Pertinggal', 'Uji Organoleptik', 'Inventaris Ompreng', 'Persiapan Bahan Baku'].forEach(t => {
-    parseSamples[t] = parseSamples['Surat Jalan'];
   });
 
+  const kitchenBySlug = (s) => kitchens.find(k => k.slug === s);
+  const kitchenByCode = (c) => kitchens.find(k => k.code === c);
+  const activeKitchens = () => kitchens.filter(k => k.status === 'BEROPERASI');
+
+  /* ============================================================
+     8. PROGRAM AGGREGATES — derived, never hand-typed
+     ============================================================ */
+  const program = {
+    asOf: ASOF,
+    asOfDate: LAST_MENU_DATE,
+    totalKitchens: kitchens.length,
+    operating: activeKitchens().length,
+    preparing: kitchens.filter(k => k.status === 'PERSIAPAN').length,
+    pmPerDay: activeKitchens().reduce((s, k) => s + k.pm, 0),
+    capacityTotal: kitchens.reduce((s, k) => s + k.capacity, 0),
+    schoolsServed: activeKitchens().reduce((s, k) => s + k.schoolCount, 0),
+    schoolsRegistered: 34,
+    porsiKumulatif: kitchens.reduce((s, k) => s + k.porsiKumulatif, 0),
+    operatingDays: Math.max.apply(null, kitchens.map(k => k.operatingDays)),
+    region: 'Malang Raya, Jawa Timur',
+    ratePerPax: 13000,
+  };
+
+  /* ============================================================
+     9. AUDIT TRAIL (§4.2, §6.3) — append-only; corrections
+        reference the original entry and never overwrite it
+     ============================================================ */
+  const auditTrail = [];
+  let auditSeq = 1;
+  function pushAudit(e) {
+    auditTrail.push(Object.assign({ id: 'E-' + String(auditSeq++).padStart(4, '0') }, e));
+  }
+
+  activeKitchens().forEach(k => {
+    k.menus.slice(-6).forEach(m => {
+      pushAudit({
+        sort: m.date + ' 14:32', time: `${fmtDate(m.date)} 14:32`,
+        actor: k.pic, role: 'Supervisor Lapangan',
+        action: 'Kunci', entity: `Menu ${fmtDate(m.date)}`,
+        summary: `${m.components.length} komponen · ${Math.round(m.total.energi)} kkal`,
+        kitchen: k.name, source: 'Unggah berkas (XLSX)', hash: m.hash, ref: null,
+      });
+    });
+  });
+
+  /* the correction spotlight (§6.3) — original preserved, correction appended */
+  const kdk = kitchenBySlug('kedungkandang');
+  const origMenu = kdk.menus.find(m => m.date === '2026-07-15') || kdk.menus[0];
+  const correction = {
+    originalDate: origMenu.date,
+    originalDateLabel: fmtDate(origMenu.date),
+    originalHash: origMenu.hash,
+    originalLockedAt: origMenu.lockedAt,
+    originalLockedBy: origMenu.lockedBy,
+    field: 'Berat porsi — Tempe orek',
+    was: '40 gram',
+    now: '45 gram',
+    reason: 'Salah baca kolom berat pada lembar sumber; dikoreksi sesuai catatan dapur.',
+    correctedAt: '16 Juli 2026 09:12 WIB',
+    correctedBy: 'Siti Rahmawati',
+    approvedBy: 'Rina Kusumaningrum',
+  };
+  correction.newHash = fingerprint({ ref: origMenu.hash, f: correction.field, v: correction.now });
+  pushAudit({
+    sort: '2026-07-16 09:12', time: '16 Jul 2026 09:12',
+    actor: correction.correctedBy, role: 'Supervisor Lapangan',
+    action: 'Koreksi', entity: `Menu ${fmtDate(origMenu.date)}`,
+    summary: `${correction.field}: ${correction.was} → ${correction.now}`,
+    kitchen: kdk.name, source: 'Input manual', hash: correction.newHash, ref: origMenu.hash,
+  });
+
+  [
+    { sort: '2026-07-21 07:48', time: '21 Jul 2026 07:48', actor: 'Siti Rahmawati',     role: 'Supervisor Lapangan', action: 'Unggah', entity: 'menu-gizi_KDK-01_2026-07-21.xlsx',   summary: '9 baris · sudah dibersihkan', kitchen: 'SPPG Kedungkandang', source: 'Unggah berkas (XLSX)' },
+    { sort: '2026-07-21 08:05', time: '21 Jul 2026 08:05', actor: 'Rina Kusumaningrum', role: 'Data Admin',          action: 'Tinjau', entity: 'menu-gizi_KDK-01_2026-07-21.xlsx',   summary: '9 dari 9 baris dikonfirmasi', kitchen: 'SPPG Kedungkandang', source: 'Unggah berkas (XLSX)' },
+    { sort: '2026-07-20 16:20', time: '20 Jul 2026 16:20', actor: 'Dwi Hartanto',       role: 'CMS Admin',           action: 'Terbit', entity: 'SOP Penerimaan Bahan Baku v2.1',     summary: 'Visibilitas: Publik', kitchen: '—', source: 'Input manual' },
+    { sort: '2026-07-18 11:02', time: '18 Jul 2026 11:02', actor: 'Rina Kusumaningrum', role: 'Data Admin',          action: 'Unggah', entity: 'pengeluaran_SGS-02_2026-07-P1.xlsx', summary: '6 kategori biaya', kitchen: 'SPPG Singosari', source: 'Unggah berkas (XLSX)' },
+  ].forEach(e => pushAudit(Object.assign({ hash: fingerprint(e), ref: null }, e)));
+
+  auditTrail.sort((a, b) => (a.sort < b.sort ? 1 : -1));
+  const auditActions = ['Kunci', 'Koreksi', 'Unggah', 'Tinjau', 'Terbit'];
+
+  /* ============================================================
+     10. EXPENSES (§6.4) — internal only. Expenditure, NOT P&L.
+     ============================================================ */
+  const expenseCategories = [
+    'Bahan pangan', 'Tenaga kerja', 'Kemasan & distribusi',
+    'Energi & utilitas', 'Pemeliharaan', 'Lainnya',
+  ];
+  const expensePeriods = ['2026-04-P1', '2026-04-P2', '2026-05-P1', '2026-05-P2', '2026-06-P1', '2026-06-P2', '2026-07-P1'];
+
+  function expensesFor(k) {
+    if (k.status !== 'BEROPERASI') return [];
+    const r = rng(k.code.charCodeAt(0) * 31 + k.pm);
+    const shares = [0.58, 0.19, 0.09, 0.07, 0.04, 0.03];
+    return expensePeriods.map((p, pi) => {
+      const workingDays = 10;
+      const base = k.pm * program.ratePerPax * workingDays * (0.93 + r() * 0.12);
+      const rows = expenseCategories.map((c, i) => {
+        const source = Math.round(base * shares[i] / 1000) * 1000;
+        const adj = (i === 0 && pi === expensePeriods.length - 1) ? 1850000
+                  : (i === 3 && pi === expensePeriods.length - 2) ? -420000 : 0;
+        return {
+          category: c, source, adjustment: adj, total: source + adj,
+          reason: adj ? (adj > 0
+            ? 'Pembelian tambahan beras akibat kenaikan jumlah penerima manfaat pada minggu kedua.'
+            : 'Koreksi tagihan listrik ganda dari periode sebelumnya.') : null,
+        };
+      });
+      const total = rows.reduce((s, x) => s + x.total, 0);
+      return {
+        period: p, kitchen: k.code, rows, total,
+        sourceTotal: rows.reduce((s, x) => s + x.source, 0),
+        adjustmentTotal: rows.reduce((s, x) => s + x.adjustment, 0),
+        workingDays, pm: k.pm,
+        costPerPortion: Math.round(total / (k.pm * workingDays)),
+        evidenceNo: `BKT/${k.code}/${p.replace(/-/g, '')}`,
+      };
+    });
+  }
+  const expenses = {};
+  kitchens.forEach(k => { expenses[k.slug] = expensesFor(k); });
+
+  /* ============================================================
+     11. DOCUMENTS (§5.6, §6.7)
+     ============================================================ */
+  const docCategories = ['SOP', 'Sertifikat', 'Laporan', 'Panduan', 'Kebijakan'];
+  const documents = [
+    { id: 'D-01', title: 'SOP Penerimaan Bahan Baku',                 cat: 'SOP',        vis: 'Publik',   version: 'v2.1', updated: '2026-07-20', size: '1,8 MB', type: 'PDF',  by: 'Dwi Hartanto',       desc: 'Prosedur pemeriksaan, penimbangan, dan pencatatan bahan baku saat diterima dapur.' },
+    { id: 'D-02', title: 'SOP Pengolahan & Pengemasan Porsi',         cat: 'SOP',        vis: 'Publik',   version: 'v1.9', updated: '2026-07-02', size: '2,4 MB', type: 'PDF',  by: 'Dwi Hartanto',       desc: 'Alur memasak, kontrol suhu, pengemasan, dan pelabelan porsi harian.' },
+    { id: 'D-03', title: 'SOP Distribusi ke Sekolah',                 cat: 'SOP',        vis: 'Publik',   version: 'v1.4', updated: '2026-06-11', size: '1,2 MB', type: 'PDF',  by: 'Dwi Hartanto',       desc: 'Pemuatan, rute, waktu tempuh maksimum, dan serah terima di sekolah.' },
+    { id: 'D-04', title: 'Sertifikat Laik Higiene Sanitasi — KDK-01', cat: 'Sertifikat', vis: 'Publik',   version: 'v1.0', updated: '2026-01-12', size: '640 KB', type: 'PDF',  by: 'Siti Rahmawati',     desc: 'Sertifikat Laik Higiene Sanitasi Jasaboga terbitan Dinkes Kota Malang.' },
+    { id: 'D-05', title: 'Sertifikat Halal — KDK-01',                 cat: 'Sertifikat', vis: 'Publik',   version: 'v1.0', updated: '2026-01-28', size: '580 KB', type: 'PDF',  by: 'Siti Rahmawati',     desc: 'Sertifikat halal terbitan BPJPH untuk dapur Kedungkandang.' },
+    { id: 'D-06', title: 'Laporan Bulanan Operasi — Juni 2026',       cat: 'Laporan',    vis: 'Publik',   version: 'v1.0', updated: '2026-07-05', size: '3,1 MB', type: 'PDF',  by: 'Rina Kusumaningrum', desc: 'Ringkasan porsi terdistribusi, kepatuhan input data, dan skor kecukupan gizi.' },
+    { id: 'D-07', title: 'Panduan Pengisian Lembar Menu & Gizi',      cat: 'Panduan',    vis: 'Publik',   version: 'v2.0', updated: '2026-06-01', size: '900 KB', type: 'PDF',  by: 'Rina Kusumaningrum', desc: 'Cara mengisi templat menu-gizi agar terbaca mesin tanpa koreksi manual.' },
+    { id: 'D-08', title: 'Kebijakan Keterbukaan Data',                cat: 'Kebijakan',  vis: 'Publik',   version: 'v1.1', updated: '2026-05-20', size: '420 KB', type: 'PDF',  by: 'Dwi Hartanto',       desc: 'Komitmen pencatatan waktu, penanggung jawab, sumber data, dan sidik isi.' },
+    { id: 'D-09', title: 'Rekap Pengeluaran Operasional Q2 2026',     cat: 'Laporan',    vis: 'Internal', version: 'v1.2', updated: '2026-07-08', size: '1,6 MB', type: 'XLSX', by: 'Rina Kusumaningrum', desc: 'Rincian biaya per kategori dan per periode untuk seluruh dapur.' },
+    { id: 'D-10', title: 'Daftar Kontak Penanggung Jawab Dapur',      cat: 'Kebijakan',  vis: 'Internal', version: 'v1.0', updated: '2026-04-14', size: '210 KB', type: 'DOCX', by: 'Dwi Hartanto',       desc: 'Kontak internal penanggung jawab tiap dapur. Tidak dipublikasikan.' },
+  ];
+  documents.forEach(d => {
+    d.versions = [
+      { version: d.version, date: d.updated, by: d.by, note: 'Versi berlaku.' },
+      { version: 'v1.0', date: '2026-02-10', by: d.by, note: 'Unggahan awal.' },
+    ].filter((v, i) => i === 0 || v.version !== d.version);
+  });
+
+  /* ============================================================
+     12. USERS (§6.9) & ANNOUNCEMENTS (§5.2, C-10)
+     ============================================================ */
+  const users = [
+    { id: 'U-01', name: 'Siti Rahmawati',     email: 'siti.rahmawati@edufarmers.org', role: 'Supervisor Lapangan', scope: 'SPPG Kedungkandang', status: 'Aktif',    lastLogin: '21 Jul 2026 07:41' },
+    { id: 'U-02', name: 'Bambang Priyanto',   email: 'bambang.p@edufarmers.org',      role: 'Supervisor Lapangan', scope: 'SPPG Singosari',     status: 'Aktif',    lastLogin: '20 Jul 2026 08:03' },
+    { id: 'U-03', name: 'Nurul Aisyah',       email: 'nurul.aisyah@edufarmers.org',   role: 'Supervisor Lapangan', scope: 'SPPG Kepanjen',      status: 'Nonaktif', lastLogin: '02 Jul 2026 10:22' },
+    { id: 'U-04', name: 'Rina Kusumaningrum', email: 'rina.k@edufarmers.org',         role: 'Data Admin',          scope: 'Semua dapur',        status: 'Aktif',    lastLogin: '21 Jul 2026 08:00' },
+    { id: 'U-05', name: 'Dwi Hartanto',       email: 'dwi.hartanto@edufarmers.org',   role: 'CMS Admin',           scope: 'Semua dapur',        status: 'Aktif',    lastLogin: '20 Jul 2026 16:18' },
+    { id: 'U-06', name: 'Agus Wijaya',        email: 'agus.wijaya@edufarmers.org',    role: 'Internal User',       scope: 'Semua dapur',        status: 'Aktif',    lastLogin: '19 Jul 2026 13:55' },
+    { id: 'U-07', name: 'Laras Prameswari',   email: 'laras.p@edufarmers.org',        role: 'Super Admin',         scope: 'Semua dapur',        status: 'Aktif',    lastLogin: '21 Jul 2026 09:10' },
+  ];
+
+  const announcements = [
+    { date: '2026-07-18', title: 'SPPG Kepanjen memasuki tahap uji coba dapur',
+      body: 'Dapur ketiga di Malang Raya menyelesaikan pemasangan peralatan dan mulai uji coba produksi terbatas. Rencana operasi penuh 1 September 2026.' },
+    { date: '2026-07-05', title: 'Laporan bulanan operasi Juni 2026 telah terbit',
+      body: 'Ringkasan porsi terdistribusi, kepatuhan input data, dan skor kecukupan gizi per dapur kini tersedia di halaman Transparansi.' },
+    { date: '2026-06-01', title: 'Tabel acuan AKG diperbarui ke versi 1.2',
+      body: 'Penyesuaian target serat dan kalsium untuk segmen SD. Skor lama tetap dapat ditelusuri melalui riwayat versi.' },
+  ];
+
+  /* ============================================================
+     13. INPUT DATA — pre-cleaned upload (PRD_MERGED C-03)
+     Data arrives already structured & verified from the desktop
+     cleaning step; the workspace performs the second-admin check.
+     ============================================================ */
+  const inboxFiles = [
+    { file: 'menu-gizi_KDK-01_2026-07-21.xlsx',  kitchen: 'KDK-01', type: 'Menu & Gizi',  rows: 9, cleanedBy: 'Siti Rahmawati',   cleanedAt: '21 Jul 2026 07:20', size: '48 KB' },
+    { file: 'menu-gizi_SGS-02_2026-07-20.xlsx',  kitchen: 'SGS-02', type: 'Menu & Gizi',  rows: 8, cleanedBy: 'Bambang Priyanto', cleanedAt: '20 Jul 2026 07:35', size: '44 KB' },
+    { file: 'pengeluaran_SGS-02_2026-07-P1.xlsx', kitchen: 'SGS-02', type: 'Pengeluaran', rows: 6, cleanedBy: 'Bambang Priyanto', cleanedAt: '18 Jul 2026 10:50', size: '31 KB' },
+  ];
+
+  /* rows presented for the second-admin confirmation pass */
+  const inboxPreview = [
+    { field: 'tanggal',            value: '2026-07-21', rule: 'Tidak boleh melebihi hari ini' },
+    { field: 'kode_dapur',         value: 'KDK-01',     rule: 'Harus cocok dengan dapur terdaftar' },
+    { field: 'Nasi putih',         value: '150 gram',   rule: 'Kategori: sumber karbohidrat' },
+    { field: 'Telur balado',       value: '55 gram',    rule: 'Kategori: lauk hewani' },
+    { field: 'Tempe orek',         value: '40 gram',    rule: 'Kategori: lauk nabati' },
+    { field: 'Sayur bening bayam', value: '70 gram',    rule: 'Kategori: sayur' },
+    { field: 'Semangka',           value: '100 gram',   rule: 'Kategori: buah' },
+    { field: 'segmen',             value: 'sd-awal',    rule: 'Kosakata terkendali' },
+    { field: 'catatan',            value: '—',          rule: 'Opsional' },
+  ];
+
+  /* ============================================================
+     14. TEMPLATE DATA DICTIONARY (§6.6)
+     ============================================================ */
+  const templates = [
+    {
+      id: 'menu-gizi', name: 'Templat Menu & Gizi', file: 'menu-gizi_v2.xlsx', version: 'v2.0', updated: '1 Jun 2026',
+      columns: [
+        { col: 'tanggal',     type: 'Tanggal', req: true,  example: '2026-07-21', rule: 'Format YYYY-MM-DD. Tidak boleh melebihi hari ini.' },
+        { col: 'kode_dapur',  type: 'Teks',    req: true,  example: 'KDK-01',     rule: 'Harus cocok dengan dapur terdaftar — bila tidak, baris ditolak.' },
+        { col: 'nama_item',   type: 'Teks',    req: true,  example: 'Nasi putih', rule: 'Nama komponen porsi.' },
+        { col: 'kategori',    type: 'Teks',    req: true,  example: 'karbo',      rule: 'Kosakata terkendali: karbo, hewani, nabati, sayur, buah, susu.' },
+        { col: 'berat_gram',  type: 'Angka',   req: true,  example: '150',        rule: 'Satuan setelah angka diabaikan. Format angka Indonesia didukung.' },
+        { col: 'energi_kkal', type: 'Angka',   req: false, example: '195',        rule: 'Opsional — bila kosong dihitung dari tabel komposisi pangan.' },
+        { col: 'protein_g',   type: 'Angka',   req: false, example: '3,6',        rule: 'Koma sebagai pemisah desimal.' },
+        { col: 'lemak_g',     type: 'Angka',   req: false, example: '0,3',        rule: 'Koma sebagai pemisah desimal.' },
+        { col: 'karbo_g',     type: 'Angka',   req: false, example: '42,9',       rule: 'Koma sebagai pemisah desimal.' },
+        { col: 'serat_g',     type: 'Angka',   req: false, example: '0,6',        rule: 'Koma sebagai pemisah desimal.' },
+        { col: 'kalsium_mg',  type: 'Angka',   req: false, example: '15',         rule: '—' },
+        { col: 'besi_mg',     type: 'Angka',   req: false, example: '0,5',        rule: '—' },
+        { col: 'vita_mcg',    type: 'Angka',   req: false, example: '0',          rule: '—' },
+        { col: 'zinc_mg',     type: 'Angka',   req: false, example: '0,8',        rule: '—' },
+        { col: 'segmen',      type: 'Teks',    req: true,  example: 'sd-awal',    rule: 'Kosakata terkendali sesuai tabel acuan AKG.' },
+        { col: 'catatan',     type: 'Teks',    req: false, example: '—',          rule: 'Bebas.' },
+      ],
+    },
+    {
+      id: 'pengeluaran', name: 'Templat Pengeluaran', file: 'pengeluaran_v2.xlsx', version: 'v2.0', updated: '1 Jun 2026',
+      columns: [
+        { col: 'periode',        type: 'Teks',  req: true,  example: '2026-07-P1',   rule: 'Format YYYY-MM-P1 atau YYYY-MM-P2 (dua periode per bulan).' },
+        { col: 'kode_dapur',     type: 'Teks',  req: true,  example: 'SGS-02',       rule: 'Harus cocok dengan dapur terdaftar.' },
+        { col: 'kategori_biaya', type: 'Teks',  req: true,  example: 'Bahan pangan', rule: 'Kosakata terkendali: ' + expenseCategories.join(', ') + '.' },
+        { col: 'jumlah_rupiah',  type: 'Angka', req: true,  example: 'Rp 214.500.000', rule: 'Awalan "Rp" dan pemisah ribuan diabaikan saat dibaca.' },
+        { col: 'penyesuaian',    type: 'Angka', req: false, example: '1.850.000',    rule: 'Boleh negatif. Bila diisi, kolom alasan menjadi wajib.' },
+        { col: 'alasan',         type: 'Teks',  req: false, example: 'Pembelian tambahan beras…', rule: 'Wajib bila penyesuaian terisi. Minimal 10 karakter, tidak boleh hanya tanda hubung.' },
+        { col: 'nomor_bukti',    type: 'Teks',  req: true,  example: 'BKT/SGS-02/202607P1', rule: 'Harus unik per periode per dapur.' },
+      ],
+    },
+  ];
+
+  /* ============================================================
+     15. INTAKE SOURCE READINESS (§6.5)
+     ============================================================ */
+  const intakeSources = [
+    { name: 'Unggah berkas (XLSX)', phase: 'Fase 1', status: 'Tersedia',     note: 'Berkas dibersihkan di aplikasi desktop, diperiksa admin kedua, lalu diunggah.' },
+    { name: 'Input manual',         phase: 'Fase 1', status: 'Tersedia',     note: 'Untuk koreksi dan catatan susulan. Selalu tercatat sebagai sumber manual.' },
+    { name: 'Endpoint MCP',         phase: 'Fase 2', status: 'Direncanakan', note: 'Adapter baru menulis ke antarmuka yang sama — tanpa mengubah aplikasi berjalan.' },
+    { name: 'Adapter Runchise',     phase: 'Fase 2', status: 'Direncanakan', note: 'Tarik data dari sistem operasional dapur bila tersedia.' },
+  ];
+
+  /* ============================================================
+     EXPORT
+     ============================================================ */
   window.MBG = {
-    national, units, partners, formTypes, recentUploads, parseSamples,
-    unitBySlug: (s) => units.find(u => u.slug === s),
-    fmt: (n) => n.toLocaleString('id-ID'),
+    nutrients, NKEYS, akg, tkpi, categories,
+    kitchens, kitchenBySlug, kitchenByCode, activeKitchens,
+    program, auditTrail, auditActions, correction,
+    expenses, expenseCategories, expensePeriods,
+    documents, docCategories, users, announcements,
+    inboxFiles, inboxPreview, templates, intakeSources,
+    menuLibrary, fingerprint, weekdaysBack, fmtDate,
+    LAST_MENU_DATE,
+    fmt: (n) => Number(n).toLocaleString('id-ID'),
+    fmtDec: (n, d) => Number(n).toLocaleString('id-ID', { minimumFractionDigits: d, maximumFractionDigits: d }),
+    rupiah: (n) => 'Rp ' + Number(n).toLocaleString('id-ID'),
     placeholder: {
       food: 'assets/img/placeholders/food.svg',
       kitchen: 'assets/img/placeholders/kitchen.svg',
       gallery: 'assets/img/placeholders/gallery.svg',
       portrait: 'assets/img/placeholders/portrait.svg',
       hero: 'assets/img/placeholders/hero.svg',
-      cam: 'assets/img/placeholders/cam.svg',
       recipe: 'assets/img/placeholders/recipe.svg',
     },
   };

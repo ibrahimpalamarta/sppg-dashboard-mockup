@@ -43,7 +43,8 @@
     opts = opts || {};
     const w = opts.width || 640, h = opts.height || 220, pad = { t: 16, r: 16, b: 28, l: 40 };
     const all = series.flatMap(s => s.points);
-    const max = Math.max(...all) * 1.1, min = Math.min(...all, 0);
+    const max = opts.max != null ? opts.max : Math.max(...all) * 1.1;
+    const min = opts.min != null ? opts.min : Math.min(...all, 0);
     const n = series[0].points.length;
     const xw = w - pad.l - pad.r, yh = h - pad.t - pad.b;
     const X = i => pad.l + (i / (n - 1)) * xw;
@@ -77,7 +78,14 @@
         ${dots}`;
     }).join('');
 
-    return `<svg viewBox="0 0 ${w} ${h}" class="chart" role="img" aria-label="${opts.aria || 'Line chart'}">${grid}${lines}${xlab}</svg>`;
+    /* optional dashed reference line, e.g. the 90% adequacy threshold */
+    let thr = '';
+    if (opts.threshold != null) {
+      const y = Y(opts.threshold);
+      thr = `<line x1="${pad.l}" y1="${y}" x2="${w - pad.r}" y2="${y}" class="chart-threshold"/>`;
+    }
+
+    return `<svg viewBox="0 0 ${w} ${h}" class="chart" role="img" aria-label="${opts.aria || 'Line chart'}">${grid}${thr}${lines}${xlab}</svg>`;
   };
 
   /* ---------- Horizontal bar (split breakdown) ---------- */
