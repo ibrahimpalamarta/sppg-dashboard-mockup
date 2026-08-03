@@ -6,6 +6,7 @@
 (function () {
   const NAV = [
     { key: 'beranda',      href: 'index.html',        label: 'Beranda' },
+    { key: 'dampak',       href: 'dampak.html',       label: 'Dampak' },
     { key: 'dapur',        href: 'dapur.html',        label: 'Dapur' },
     { key: 'menu',         href: 'menu.html',         label: 'Menu & Gizi' },
     { key: 'transparansi', href: 'transparansi.html', label: 'Transparansi' },

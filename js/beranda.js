@@ -98,6 +98,9 @@
           <div class="it reveal" data-delay="140"><div class="v"><span class="count" data-to="${P.schoolsServed}">0</span> <span style="font-size:1rem;color:var(--muted)">/ ${P.schoolsRegistered}</span></div><div class="l">Sekolah terlayani</div><div class="s">dari sekolah terdaftar di wilayah</div></div>
           <div class="it reveal" data-delay="210"><div class="v count" data-to="${P.operatingDays}">0</div><div class="l">Hari operasi berturut</div><div class="s">tanpa jeda pada dapur pertama</div></div>
         </div>
+        <div style="text-align:center;margin-top:var(--sp-5)">
+          <a class="btn btn-ghost btn-sm" href="dampak.html">Lihat laporan dampak lengkap ${icon('arrowRight')}</a>
+        </div>
       </div>
     </section>
 
