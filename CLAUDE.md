@@ -16,7 +16,7 @@ Four conflicts were resolved by the user on 31 July 2026 and are now settled:
 
 | ID | Resolution |
 |---|---|
-| **C-01** | 3-kitchen Malang Raya footprint (Kebonsari KDK-01, Singosari SGS-02, Kepanjen KPJ-03) |
+| **C-01** | 3-kitchen Malang Raya footprint (Kebonsari KDK-01, Donomulyo SGS-02, Lawang KPJ-03) |
 | **C-02** | Six-role model per §3.2 (assumed, not explicitly signed off — reconfirm before production) |
 | **C-03** | Data arrives **pre-cleaned** from a desktop step; the workspace is a second-admin verification pass, **not** an in-app parsing engine |
 | **C-04** | **CCTV / kitchen cameras dropped entirely** — Source B excludes them twice. Do not re-add. |
