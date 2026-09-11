@@ -201,18 +201,18 @@
       since: '2026-02-16', operatingDays: 108, menuDays: 22, seed: 11, missing: [],
     },
     {
-      slug: 'singosari', code: 'SGS-02', name: 'SPPG Singosari', status: 'BEROPERASI',
-      region: 'Kabupaten Malang', district: 'Singosari', village: 'Losari', province: 'Jawa Timur',
-      address: 'Jl. Raya Randuagung No. 27, Singosari, Kabupaten Malang, Jawa Timur 65153',
+      slug: 'singosari', code: 'SGS-02', name: 'SPPG Donomulyo', status: 'BEROPERASI',
+      region: 'Kabupaten Malang', district: 'Donomulyo', village: 'Losari', province: 'Jawa Timur',
+      address: 'Jl. Raya Randuagung No. 27, Donomulyo, Kabupaten Malang, Jawa Timur 65153',
       lat: -7.8931, lng: 112.6647,
       pic: 'Bambang Priyanto', pm: 2310, capacity: 2600, schools: 13,
       since: '2026-05-11', operatingDays: 50, menuDays: 20, seed: 23,
       missing: ['2026-07-14', '2026-07-17', '2026-07-20', '2026-07-21'],
     },
     {
-      slug: 'kepanjen', code: 'KPJ-03', name: 'SPPG Kepanjen', status: 'PERSIAPAN',
-      region: 'Kabupaten Malang', district: 'Kepanjen', village: 'Panggungrejo', province: 'Jawa Timur',
-      address: 'Jl. Panji No. 88, Kepanjen, Kabupaten Malang, Jawa Timur 65163',
+      slug: 'kepanjen', code: 'KPJ-03', name: 'SPPG Lawang', status: 'PERSIAPAN',
+      region: 'Kabupaten Malang', district: 'Lawang', village: 'Panggungrejo', province: 'Jawa Timur',
+      address: 'Jl. Panji No. 88, Lawang, Kabupaten Malang, Jawa Timur 65163',
       lat: -8.1310, lng: 112.5710,
       pic: 'Nurul Aisyah', pm: 0, capacity: 2500, schools: 0,
       since: null, plannedStart: '2026-09-01', operatingDays: 0, menuDays: 0, seed: 31, missing: [],
@@ -375,7 +375,7 @@
     { sort: '2026-07-21 07:48', time: '21 Jul 2026 07:48', actor: 'Siti Rahmawati',     role: 'Supervisor Lapangan', action: 'Unggah', entity: 'menu-gizi_KDK-01_2026-07-21.xlsx',   summary: '9 baris · sudah dibersihkan', kitchen: 'SPPG Kebonsari', source: 'Unggah berkas (XLSX)' },
     { sort: '2026-07-21 08:05', time: '21 Jul 2026 08:05', actor: 'Rina Kusumaningrum', role: 'Data Admin',          action: 'Tinjau', entity: 'menu-gizi_KDK-01_2026-07-21.xlsx',   summary: '9 dari 9 baris dikonfirmasi', kitchen: 'SPPG Kebonsari', source: 'Unggah berkas (XLSX)' },
     { sort: '2026-07-20 16:20', time: '20 Jul 2026 16:20', actor: 'Dwi Hartanto',       role: 'CMS Admin',           action: 'Terbit', entity: 'SOP Penerimaan Bahan Baku v2.1',     summary: 'Visibilitas: Publik', kitchen: '—', source: 'Input manual' },
-    { sort: '2026-07-18 11:02', time: '18 Jul 2026 11:02', actor: 'Rina Kusumaningrum', role: 'Data Admin',          action: 'Unggah', entity: 'pengeluaran_SGS-02_2026-07-P1.xlsx', summary: '6 kategori biaya', kitchen: 'SPPG Singosari', source: 'Unggah berkas (XLSX)' },
+    { sort: '2026-07-18 11:02', time: '18 Jul 2026 11:02', actor: 'Rina Kusumaningrum', role: 'Data Admin',          action: 'Unggah', entity: 'pengeluaran_SGS-02_2026-07-P1.xlsx', summary: '6 kategori biaya', kitchen: 'SPPG Donomulyo', source: 'Unggah berkas (XLSX)' },
   ].forEach(e => pushAudit(Object.assign({ hash: fingerprint(e), ref: null }, e)));
 
   auditTrail.sort((a, b) => (a.sort < b.sort ? 1 : -1));
@@ -450,8 +450,8 @@
      ============================================================ */
   const users = [
     { id: 'U-01', name: 'Siti Rahmawati',     email: 'siti.rahmawati@edufarmers.org', role: 'Supervisor Lapangan', scope: 'SPPG Kebonsari', status: 'Aktif',    lastLogin: '21 Jul 2026 07:41' },
-    { id: 'U-02', name: 'Bambang Priyanto',   email: 'bambang.p@edufarmers.org',      role: 'Supervisor Lapangan', scope: 'SPPG Singosari',     status: 'Aktif',    lastLogin: '20 Jul 2026 08:03' },
-    { id: 'U-03', name: 'Nurul Aisyah',       email: 'nurul.aisyah@edufarmers.org',   role: 'Supervisor Lapangan', scope: 'SPPG Kepanjen',      status: 'Nonaktif', lastLogin: '02 Jul 2026 10:22' },
+    { id: 'U-02', name: 'Bambang Priyanto',   email: 'bambang.p@edufarmers.org',      role: 'Supervisor Lapangan', scope: 'SPPG Donomulyo',     status: 'Aktif',    lastLogin: '20 Jul 2026 08:03' },
+    { id: 'U-03', name: 'Nurul Aisyah',       email: 'nurul.aisyah@edufarmers.org',   role: 'Supervisor Lapangan', scope: 'SPPG Lawang',      status: 'Nonaktif', lastLogin: '02 Jul 2026 10:22' },
     { id: 'U-04', name: 'Rina Kusumaningrum', email: 'rina.k@edufarmers.org',         role: 'Data Admin',          scope: 'Semua dapur',        status: 'Aktif',    lastLogin: '21 Jul 2026 08:00' },
     { id: 'U-05', name: 'Dwi Hartanto',       email: 'dwi.hartanto@edufarmers.org',   role: 'CMS Admin',           scope: 'Semua dapur',        status: 'Aktif',    lastLogin: '20 Jul 2026 16:18' },
     { id: 'U-06', name: 'Agus Wijaya',        email: 'agus.wijaya@edufarmers.org',    role: 'Internal User',       scope: 'Semua dapur',        status: 'Aktif',    lastLogin: '19 Jul 2026 13:55' },
@@ -459,7 +459,7 @@
   ];
 
   const announcements = [
-    { date: '2026-07-18', title: 'SPPG Kepanjen memasuki tahap uji coba dapur',
+    { date: '2026-07-18', title: 'SPPG Lawang memasuki tahap uji coba dapur',
       body: 'Dapur ketiga di Malang Raya menyelesaikan pemasangan peralatan dan mulai uji coba produksi terbatas. Rencana operasi penuh 1 September 2026.' },
     { date: '2026-07-05', title: 'Laporan bulanan operasi Juni 2026 telah terbit',
       body: 'Ringkasan porsi terdistribusi, kepatuhan input data, dan skor kecukupan gizi per dapur kini tersedia di halaman Transparansi.' },
